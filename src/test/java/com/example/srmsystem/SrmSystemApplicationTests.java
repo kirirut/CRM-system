@@ -7,7 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 class SrmSystemApplicationTests {
 
     @Test
-    void contextLoads() {//Test
+    void contextLoads() {
+        System.out.println("Hello World");
     }
 
 }
