@@ -4,12 +4,12 @@ import com.example.srmsystem.enums.EmployeeStatus;
 import com.example.srmsystem.exception.ResourceNotFoundException;
 import com.example.srmsystem.model.Employee;
 import com.example.srmsystem.repository.EmployeeRepository;
-import com.example.srmsystem.repository.impl.EmployeeRepositoryImpl;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 
 
-import java.util.List;
+
 
 @Service
 public class EmployeeService {
@@ -18,7 +18,7 @@ public class EmployeeService {
     public EmployeeService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
         employeeRepository.addSampleEmployees();
-        System.out.println("");
+
     }
 
     public List<Employee> getAllEmployees() {
