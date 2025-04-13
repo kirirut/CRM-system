@@ -12,22 +12,24 @@ public final class UserMapper {
     }
 
     public User fromCreateUserDto(final CreateUserDto createUserDto) {
-        if(createUserDto==null) {
-            return null;
-        }
-        User user = new User();
-        user.setUsername(createUserDto.getUsername());
-        user.setEmail(createUserDto.getEmail());
-        user.setPasswordHash(createUserDto.getPassword());
-        user.setRole(createUserDto.getRole()); // Установка роли пользователя
 
-        return user;
-    }
-    public DisplayUserDto toDisplayUserDto(final User user){
-        if(user==null) {
+        if (createUserDto != null) {
+            User user = new User();
+            user.setUsername(createUserDto.getUsername());
+            user.setEmail(createUserDto.getEmail());
+            user.setPasswordHash(createUserDto.getPassword());
+
+            return user;
+        } else {
             return null;
         }
-        return new DisplayUserDto(user.getId(), user.getUsername(),user.getEmail());
+    }
+
+    public DisplayUserDto toDisplayUserDto(final User user) {
+        if (null == user) {
+            return null;
+        }
+        return new DisplayUserDto(user.getId(), user.getUsername(), user.getEmail());
     }
 
 }

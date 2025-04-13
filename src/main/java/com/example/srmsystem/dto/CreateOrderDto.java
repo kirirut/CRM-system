@@ -1,15 +1,20 @@
 package com.example.srmsystem.dto;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateUserDto {
+public class CreateOrderDto {
 
-    private String username;
-    private String email;
-    private String password;
+    private String description;
+
+    private LocalDateTime orderDate;
+
+    private Long customerId;
+
 }
