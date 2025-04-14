@@ -8,7 +8,6 @@ import com.example.srmsystem.model.Customer;
 import com.example.srmsystem.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class CustomerService {
+    private static final String CUSTOMER_NOT_FOUND_MESSAGE = "Customer not found with id ";
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
 
@@ -28,12 +28,12 @@ public class CustomerService {
     public List<DisplayCustomerDto> getAllCustomers() {
         return customerRepository.findAll().stream()
                 .map(customerMapper::toDisplayCustomerDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public DisplayCustomerDto getCustomerById(final Long id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Customer not found with id " + id));
+                .orElseThrow(() -> new NotFoundException(CUSTOMER_NOT_FOUND_MESSAGE + id));
         return customerMapper.toDisplayCustomerDto(customer);
     }
 
@@ -45,7 +45,7 @@ public class CustomerService {
 
     public DisplayCustomerDto updateCustomer(final Long id, final CreateCustomerDto customerDto) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found with id " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, CUSTOMER_NOT_FOUND_MESSAGE + id));
 
         customer.setName(customerDto.getName());
         customer.setEmail(customerDto.getEmail());
@@ -60,7 +60,7 @@ public class CustomerService {
     @Transactional
     public void deleteCustomer(final Long id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found with id " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, CUSTOMER_NOT_FOUND_MESSAGE + id));
         customerRepository.delete(customer);
     }
 }

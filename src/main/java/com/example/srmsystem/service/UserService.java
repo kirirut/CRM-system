@@ -8,7 +8,6 @@ import com.example.srmsystem.model.User;
 import com.example.srmsystem.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,7 +27,7 @@ public class UserService {
     public List<DisplayUserDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDisplayUserDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public DisplayUserDto getUserById(final Long id) {

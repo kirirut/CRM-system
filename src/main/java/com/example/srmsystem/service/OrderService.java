@@ -8,7 +8,6 @@ import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.CustomerRepository;
 import com.example.srmsystem.repository.OrderRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +27,9 @@ public class OrderService {
     }
 
     public List<DisplayOrderDto> getAllOrdersByCustomerId(Long customerId) {
-        List<Order> orders = orderRepository.findByCustomerId(customerId);
-        return orders.stream()
+        return orderRepository.findByCustomerId(customerId).stream()
                 .map(orderMapper::toDisplayOrderDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public DisplayOrderDto getOrderById(Long customerId, Long orderId) {
