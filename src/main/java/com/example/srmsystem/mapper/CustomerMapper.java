@@ -2,7 +2,10 @@ package com.example.srmsystem.mapper;
 
 import com.example.srmsystem.dto.CreateCustomerDto;
 import com.example.srmsystem.dto.DisplayCustomerDto;
+import com.example.srmsystem.dto.DisplayOrderDto;
 import com.example.srmsystem.model.Customer;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,13 +34,28 @@ public final class CustomerMapper {
             return null;
         }
 
+        List<DisplayOrderDto> orders = customer.getOrders()
+                .stream()
+                .map(order -> new DisplayOrderDto (
+                        order.getId(),
+                        order.getDescription(),
+                        order.getOrderDate(),
+                        customer.getId(),
+                        customer.getUsername(),
+                        order.getCreatedAt(),
+                        order.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
+
         return new DisplayCustomerDto(
                 customer.getId(),
                 customer.getUsername(),
                 customer.getEmail(),
                 customer.getPhone(),
                 customer.getAddress(),
-                customer.getCompanyName()
+                customer.getCompanyName(),
+                orders
         );
     }
+
 }
