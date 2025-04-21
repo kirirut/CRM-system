@@ -1,5 +1,6 @@
 package com.example.srmsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +36,7 @@ public class Customer {
     private String companyName;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Order> orders;
 
     @Column(name = "created_at", nullable = false, updatable = false)

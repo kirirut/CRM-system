@@ -34,7 +34,7 @@ public final class OrderMapper {
         dto.setDescription(order.getDescription());
         dto.setOrderDate(order.getOrderDate());
         dto.setCustomerId(order.getCustomer().getId());
-        dto.setCustomerName(order.getCustomer().getUsername ());
+        dto.setCustomerName(order.getCustomer().getUsername());
         dto.setCreatedAt(order.getCreatedAt());
         dto.setUpdatedAt(order.getUpdatedAt());
         return dto;

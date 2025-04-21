@@ -1,5 +1,6 @@
 package com.example.srmsystem.service;
 
+import com.example.srmsystem.config.CacheConfig;
 import com.example.srmsystem.dto.CreateOrderDto;
 import com.example.srmsystem.dto.DisplayOrderDto;
 import com.example.srmsystem.mapper.OrderMapper;
@@ -11,33 +12,59 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final OrderMapper orderMapper;
+    private final CacheConfig cacheConfig;
 
     public OrderService(OrderRepository orderRepository,
                         CustomerRepository customerRepository,
-                        OrderMapper orderMapper) {
+                        OrderMapper orderMapper,
+                        CacheConfig cacheConfig) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
         this.orderMapper = orderMapper;
+        this.cacheConfig = cacheConfig;
     }
 
     public List<DisplayOrderDto> getAllOrdersByCustomerId(Long customerId) {
-        return orderRepository.findByCustomerId(customerId).stream()
+        List<DisplayOrderDto> cachedOrders = cacheConfig.getAllOrders();
+        if (cachedOrders != null) {
+            return cachedOrders.stream()
+                    .filter(order -> order.getCustomerId().equals(customerId))
+                    .toList();
+        }
+        List<Order> orders = orderRepository.findByCustomerId(customerId);
+        List<DisplayOrderDto> displayOrderDtos = orders.stream()
                 .map(orderMapper::toDisplayOrderDto)
                 .toList();
+        cacheConfig.putAllOrders(orders);
+        return displayOrderDtos;
     }
 
     public DisplayOrderDto getOrderById(Long customerId, Long orderId) {
+        List<DisplayOrderDto> cachedOrders = cacheConfig.getAllOrders();
+        if (cachedOrders != null) {
+            DisplayOrderDto orderDto = cachedOrders.stream()
+                    .filter(order -> order.getCustomerId().equals(customerId) && order.getId().equals(orderId))
+                    .findFirst()
+                    .orElse(null);
+            if (orderDto != null) {
+                return orderDto;
+            }
+        }
         Order order = orderRepository.findByCustomerIdAndId(customerId, orderId);
         if (order == null) {
             return null;
         }
-        return orderMapper.toDisplayOrderDto(order);
+        DisplayOrderDto displayOrderDto = orderMapper.toDisplayOrderDto(order);
+        cacheConfig.putAllOrders(orderRepository.findByCustomerId(customerId));
+        return displayOrderDto;
     }
 
     @Transactional
@@ -48,6 +75,7 @@ public class OrderService {
         Order order = orderMapper.fromCreateOrderDto(createOrderDto, customer);
         Order savedOrder = orderRepository.save(order);
 
+        cacheConfig.putAllOrders(orderRepository.findByCustomerId(customerId));
         return orderMapper.toDisplayOrderDto(savedOrder);
     }
 
@@ -63,6 +91,7 @@ public class OrderService {
         order.setUpdatedAt(null);
 
         Order updatedOrder = orderRepository.save(order);
+        cacheConfig.putAllOrders(orderRepository.findByCustomerId(customerId));
         return orderMapper.toDisplayOrderDto(updatedOrder);
     }
 
@@ -72,7 +101,7 @@ public class OrderService {
         if (order == null) {
             throw new RuntimeException("Order not found");
         }
-
         orderRepository.delete(order);
+        cacheConfig.removeAllOrders();
     }
 }
