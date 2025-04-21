@@ -22,12 +22,18 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<DisplayOrderDto>> getAllOrders(@PathVariable Long customerId) {
         List<DisplayOrderDto> orders = orderService.getAllOrdersByCustomerId(customerId);
+        if (orders == null || orders.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/{orderId}")
     public ResponseEntity<DisplayOrderDto> getOrderById(@PathVariable Long customerId, @PathVariable Long orderId) {
         DisplayOrderDto order = orderService.getOrderById(customerId, orderId);
+        if (order == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(order);
     }
 

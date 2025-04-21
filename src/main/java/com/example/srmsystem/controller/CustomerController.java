@@ -22,12 +22,22 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<List<DisplayCustomerDto>> getAllCustomers() {
         List<DisplayCustomerDto> customers = customerService.getAllCustomers();
+        if (customers == null || customers.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(customers);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DisplayCustomerDto> getCustomerById(@PathVariable Long id) {
-        return ResponseEntity.ok(customerService.getCustomerById(id));
+        if (id == null || id <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        DisplayCustomerDto customer = customerService.getCustomerById(id);
+        if (customer == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(customer);
     }
 
     @PostMapping
