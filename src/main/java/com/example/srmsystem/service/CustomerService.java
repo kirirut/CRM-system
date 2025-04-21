@@ -44,11 +44,12 @@ public class CustomerService {
         return customerMapper.toDisplayCustomerDto(saved);
     }
 
+    @SuppressWarnings("checkstyle:MethodParamPad")
     public DisplayCustomerDto updateCustomer(final Long id, final CreateCustomerDto customerDto) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, CUSTOMER_NOT_FOUND_MESSAGE + id));
 
-        customer.setName(customerDto.getName());
+        customer.setUsername (customerDto.getUsername());
         customer.setEmail(customerDto.getEmail());
         customer.setPhone(customerDto.getPhone());
         customer.setAddress(customerDto.getAddress());

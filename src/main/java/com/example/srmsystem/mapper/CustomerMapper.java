@@ -16,7 +16,8 @@ public final class CustomerMapper {
         }
 
         Customer customer = new Customer();
-        customer.setName(createCustomerDto.getName());
+        customer.setUsername(createCustomerDto.getUsername());
+        customer.setPassword(createCustomerDto.getPassword());
         customer.setEmail(createCustomerDto.getEmail());
         customer.setPhone(createCustomerDto.getPhone());
         customer.setAddress(createCustomerDto.getAddress());
@@ -32,7 +33,7 @@ public final class CustomerMapper {
 
         return new DisplayCustomerDto(
                 customer.getId(),
-                customer.getName(),
+                customer.getUsername(),
                 customer.getEmail(),
                 customer.getPhone(),
                 customer.getAddress(),

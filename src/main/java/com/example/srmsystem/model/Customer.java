@@ -20,8 +20,11 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
+    private String username;
+
     @Column(nullable = false)
-    private String name;
+    private String password;
 
     private String email;
 
