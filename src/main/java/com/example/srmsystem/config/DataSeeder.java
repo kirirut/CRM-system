@@ -4,14 +4,13 @@ import com.example.srmsystem.model.Customer;
 import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.CustomerRepository;
 import com.example.srmsystem.repository.OrderRepository;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 public class DataSeeder {
@@ -25,7 +24,7 @@ public class DataSeeder {
             List<Customer> customers = new ArrayList<>();
             List<Order> orders = new ArrayList<>();
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 30; i++) {
                 Customer customer = new Customer();
                 customer.setUsername(faker.name().username());
                 customer.setPassword("pass" + i);
