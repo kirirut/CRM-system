@@ -2,17 +2,27 @@ package com.example.srmsystem.controller;
 
 import com.example.srmsystem.dto.CreateCustomerDto;
 import com.example.srmsystem.dto.DisplayCustomerDto;
+import com.example.srmsystem.exception.BadRequestException;
+import com.example.srmsystem.exception.EntityNotFoundException;
+import com.example.srmsystem.exception.NoContentException;
 import com.example.srmsystem.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
+
+import jakarta.transaction.Transactional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
+@Validated
 @Slf4j
 @Tag(name = "Customer Controller", description = "Управление клиентами: создание, обновление, удаление, просмотр")
 @RestController
@@ -35,10 +45,10 @@ public class CustomerController {
         log.info("Запрос на получение всех клиентов");
         List<DisplayCustomerDto> customers = customerService.getAllCustomers();
         if (customers == null || customers.isEmpty()) {
-            log.info("Список клиентов пуст");
-            return ResponseEntity.noContent().build();
+            log.info("List of clients is empty");
+            throw new NoContentException("List of clients is empty");
         }
-        log.info("Найдено {} клиентов", customers.size());
+        log.info("Found {} clients", customers.size());
         return ResponseEntity.ok(customers);
     }
 
@@ -52,15 +62,15 @@ public class CustomerController {
     public ResponseEntity<DisplayCustomerDto> getCustomerById(@PathVariable Long id) {
         log.info("Запрос на получение клиента с ID: {}", id);
         if (id == null || id <= 0) {
-            log.warn("Некорректный ID клиента: {}", id);
-            return ResponseEntity.badRequest().build();
+            log.warn("Incorrect ID of client: {}", id);
+            throw new BadRequestException("Incorrect ID of client");
         }
         DisplayCustomerDto customer = customerService.getCustomerById(id);
         if (customer == null) {
-            log.warn("Клиент с ID {} не найден", id);
-            return ResponseEntity.notFound().build();
+            log.warn("Client with id {} not found:", id);
+            throw new EntityNotFoundException(String.format("Client with id %d not found", id));
         }
-        log.info("Клиент с ID {} найден", id);
+        log.info("Client with ID {} found", id);
         return ResponseEntity.ok(customer);
     }
 
@@ -69,10 +79,10 @@ public class CustomerController {
             @ApiResponse(responseCode = "201", description = "Клиент успешно создан")
     })
     @PostMapping
-    public ResponseEntity<DisplayCustomerDto> addCustomer(@RequestBody CreateCustomerDto createCustomerDto) {
-        log.info("Запрос на создание клиента: {}", createCustomerDto);
+    public ResponseEntity<DisplayCustomerDto> addCustomer(@RequestBody @Valid CreateCustomerDto createCustomerDto) {
+        log.info("Request to add client: {}", createCustomerDto);
         DisplayCustomerDto createdCustomer = customerService.createCustomer(createCustomerDto);
-        log.info("Клиент успешно создан: {}", createdCustomer);
+        log.info("Client created: {}", createdCustomer);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
     }
 
@@ -82,22 +92,34 @@ public class CustomerController {
             @ApiResponse(responseCode = "404", description = "Клиент не найден")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<DisplayCustomerDto> updateCustomer(@PathVariable Long id, @RequestBody CreateCustomerDto createCustomerDto) {
-        log.info("Запрос на обновление клиента с ID {}: {}", id, createCustomerDto);
-        DisplayCustomerDto updatedCustomer = customerService.updateCustomer(id, createCustomerDto);
-        log.info("Клиент с ID {} успешно обновлён", id);
-        return ResponseEntity.ok(updatedCustomer);
+    public ResponseEntity<DisplayCustomerDto> updateCustomer(@PathVariable Long id, @Valid @RequestBody CreateCustomerDto createCustomerDto) {
+        log.info("Request to update client with id {}: {}", id, createCustomerDto);
+        try {
+            DisplayCustomerDto updatedCustomer = customerService.updateCustomer(id, createCustomerDto);
+            log.info("Customer with ID {} successfully updated", id);
+            return ResponseEntity.ok(updatedCustomer);
+        } catch (EntityNotFoundException ex) {
+            log.error("Error updating customer with ID {}: {}", id, ex.getMessage());
+            throw new EntityNotFoundException("Customer with id " + id + " not found");
+        }
     }
 
     @Operation(summary = "Удалить клиента по ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Клиент успешно удален")
     })
+
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
-        log.info("Запрос на удаление клиента с ID {}", id);
-        customerService.deleteCustomer(id);
-        log.info("Клиент с ID {} успешно удалён", id);
-        return ResponseEntity.noContent().build();
+        log.info("Request to delete client with id {}", id);
+        try {
+            customerService.deleteCustomer(id);
+            log.info("Client with id {} successfully deleted", id);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException ex) {
+            log.error("Client with id {} not found", id);
+            throw new EntityNotFoundException("Client with id " + id + " not found");
+        }
     }
 }

@@ -2,10 +2,12 @@ package com.example.srmsystem.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.hibernate.validator.constraints.NotBlank;
 
 
 @Entity
@@ -19,6 +21,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Description must not be blank")
     @Column(nullable = false)
     private String description;
 

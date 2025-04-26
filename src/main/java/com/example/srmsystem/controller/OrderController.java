@@ -2,16 +2,26 @@ package com.example.srmsystem.controller;
 
 import com.example.srmsystem.dto.CreateOrderDto;
 import com.example.srmsystem.dto.DisplayOrderDto;
+import com.example.srmsystem.exception.BadRequestException;
+import com.example.srmsystem.exception.EntityNotFoundException;
+import com.example.srmsystem.exception.NoContentException;
 import com.example.srmsystem.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
+
+import jakarta.transaction.Transactional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
 
 @Slf4j
 @Tag(name = "Order Controller", description = "Управление заказами клиента: создание, обновление, удаление, просмотр")
@@ -29,19 +39,24 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список заказов получен"),
             @ApiResponse(responseCode = "204", description = "Список заказов пуст"),
-            @ApiResponse(responseCode = "400", description = "Некорректный ID клиента")
+            @ApiResponse(responseCode = "404", description = "Некорректный ID клиента")
     })
     @GetMapping
     public ResponseEntity<List<DisplayOrderDto>> getAllOrders(@PathVariable Long customerId) {
-        log.info("Получен запрос на получение всех заказов клиента с ID {}", customerId);
+        log.info("Received request to get all orders for customer with ID {}", customerId);
+        if (customerId == null || customerId <= 0) {
+            log.warn("Invalid customer ID: {}", customerId);
+            throw new BadRequestException ("Invalid customer ID:" + customerId);
+        }
         List<DisplayOrderDto> orders = orderService.getAllOrdersByCustomerId(customerId);
         if (orders == null || orders.isEmpty()) {
-            log.info("Заказы клиента с ID {} не найдены", customerId);
-            return ResponseEntity.noContent().build();
+            log.info("No orders found for customer with ID {}", customerId);
+            throw new NoContentException("No orders found for customer with ID " + customerId);
         }
-        log.info("Найдено {} заказов для клиента с ID {}", orders.size(), customerId);
+        log.info("Found {} orders for customer with ID {}", orders.size(), customerId);
         return ResponseEntity.ok(orders);
     }
+
 
     @Operation(summary = "Получить заказ клиента по ID")
     @ApiResponses(value = {
@@ -50,13 +65,14 @@ public class OrderController {
     })
     @GetMapping("/{orderId}")
     public ResponseEntity<DisplayOrderDto> getOrderById(@PathVariable Long customerId, @PathVariable Long orderId) {
-        log.info("Получен запрос на получение заказа ID {} для клиента ID {}", orderId, customerId);
+        log.info("Received request to get order with ID {} for customer with ID {}", orderId, customerId);
+
         DisplayOrderDto order = orderService.getOrderById(customerId, orderId);
         if (order == null) {
-            log.warn("Заказ ID {} для клиента ID {} не найден", orderId, customerId);
-            return ResponseEntity.notFound().build();
+            log.warn ( "Order with ID {} for customer with ID {} not found", orderId, customerId );
+            throw new NoContentException ( String.format ( "Order with ID %d for customer with ID %d not found", orderId, customerId ) );
         }
-        log.info("Заказ ID {} для клиента ID {} успешно найден", orderId, customerId);
+            log.info("Order with ID {} for customer with ID {} successfully found", orderId, customerId);
         return ResponseEntity.ok(order);
     }
 
@@ -67,10 +83,10 @@ public class OrderController {
     })
     @PostMapping
     public ResponseEntity<DisplayOrderDto> addOrderToCustomer(
-            @PathVariable Long customerId, @RequestBody CreateOrderDto createOrderDto) {
-        log.info("Получен запрос на создание нового заказа для клиента ID {}: {}", customerId, createOrderDto);
+            @PathVariable Long customerId, @Valid @RequestBody CreateOrderDto createOrderDto) {
+        log.info("Received request to create a new order for customer ID {}: {}", customerId, createOrderDto);
         DisplayOrderDto createdOrder = orderService.createOrderForCustomer(customerId, createOrderDto);
-        log.info("Создан заказ ID {} для клиента ID {}", createdOrder.getId(), customerId);
+        log.info("Created order ID {} for customer ID {}", createdOrder.getId(), customerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
@@ -81,22 +97,28 @@ public class OrderController {
     })
     @PutMapping("/{orderId}")
     public ResponseEntity<DisplayOrderDto> updateOrder(
-            @PathVariable Long customerId, @PathVariable Long orderId, @RequestBody CreateOrderDto createOrderDto) {
-        log.info("Получен запрос на обновление заказа ID {} для клиента ID {}: {}", orderId, customerId, createOrderDto);
+            @PathVariable Long customerId, @PathVariable Long orderId, @Valid @RequestBody CreateOrderDto createOrderDto) {
+        log.info("Received request to update order ID {} for customer ID {}: {}", orderId, customerId, createOrderDto);
         DisplayOrderDto updatedOrder = orderService.updateOrder(customerId, orderId, createOrderDto);
-        log.info("Заказ ID {} для клиента ID {} успешно обновлён", orderId, customerId);
+        if (updatedOrder == null) {
+            log.warn("Order ID {} for customer ID {} not found", orderId, customerId);
+            throw new EntityNotFoundException ("Order with ID " + orderId + " for customer ID " + customerId + " not found");
+        }
+        log.info("Order ID {} for customer ID {} successfully updated", orderId, customerId);
         return ResponseEntity.ok(updatedOrder);
     }
+
 
     @Operation(summary = "Удалить заказ клиента")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Заказ успешно удалён")
     })
+    @Transactional
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long customerId, @PathVariable Long orderId) {
-        log.info("Получен запрос на удаление заказа ID {} клиента ID {}", orderId, customerId);
+        log.info("Received request to delete order ID {} for customer ID {}", orderId, customerId);
         orderService.deleteOrder(customerId, orderId);
-        log.info("Заказ ID {} клиента ID {} успешно удалён", orderId, customerId);
+        log.info("Order ID {} for customer ID {} successfully deleted", orderId, customerId);
         return ResponseEntity.noContent().build();
     }
 }

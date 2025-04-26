@@ -1,5 +1,6 @@
 package com.example.srmsystem.controller;
 
+import com.example.srmsystem.exception.EntityNotFoundException;
 import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.OrderRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,8 +11,11 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @Slf4j
 @Tag(name = "Order Filter Controller", description = "Фильтрация заказов по имени клиента и дате заказа")
 @RestController
@@ -34,9 +38,10 @@ public class OrderFilterController {
         log.info("Запрос на получение заказов по имени клиента: {}", name);
         List<Order> orders = orderRepository.findByCustomerName(name);
         if (orders.isEmpty()) {
-            log.warn("Заказы по имени клиента '{}' не найдены", name);
+            log.warn("No orders found for customer with name '{}'", name);
+            throw new EntityNotFoundException("Orders not found for customer with name: " + name);
         } else {
-            log.info("Найдено {} заказов по имени клиента '{}'", orders.size(), name);
+            log.info("Found {} orders for customer with name '{}'", orders.size(), name);
         }
         return orders;
     }
@@ -50,12 +55,13 @@ public class OrderFilterController {
     @GetMapping("/date")
     public List<Order> getOrdersByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        log.info("Запрос на получение заказов по дате: {}", date);
+        log.info("Request to get orders for date: {}", date);
         List<Order> orders = orderRepository.findByOrderDate(date);
         if (orders.isEmpty()) {
-            log.warn("Заказы на дату '{}' не найдены", date);
+            log.warn("No orders found for date '{}'", date);
+            throw new EntityNotFoundException("Orders not found for date: " + date);
         } else {
-            log.info("Найдено {} заказов на дату '{}'", orders.size(), date);
+            log.info("Found {} orders for date '{}'", orders.size(), date);
         }
         return orders;
     }
