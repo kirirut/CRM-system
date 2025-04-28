@@ -7,20 +7,19 @@ import com.example.srmsystem.exception.EntityNotFoundException;
 import com.example.srmsystem.exception.NoContentException;
 import com.example.srmsystem.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
-
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 
 @Validated
 @Slf4j
@@ -85,6 +84,32 @@ public class CustomerController {
         log.info("Client created: {}", createdCustomer);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
     }
+
+    @Operation(summary = "Создать несколько клиентов (bulk)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Клиенты успешно созданы"),
+            @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PostMapping("/bulk")
+    public ResponseEntity<List<DisplayCustomerDto>> addCustomersBulk(@RequestBody @Valid List<CreateCustomerDto> customerDtos) {
+        log.info("Request to bulk add {} clients", customerDtos.size());
+
+        boolean anyExists = customerService.anyCustomerExistsByUsername(customerDtos);
+
+        if (anyExists) {
+            log.error("One or more customers already exist based on username");
+            return ResponseEntity.status(HttpStatus.CONFLICT).build(); // 409 Conflict
+        }
+
+        List<DisplayCustomerDto> createdCustomers = customerDtos.stream()
+                .map(customerService::createCustomer)
+                .collect(Collectors.toList());
+
+        log.info("{} clients successfully created", createdCustomers.size());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomers);
+    }
+
 
     @Operation(summary = "Обновить информацию о клиенте")
     @ApiResponses(value = {

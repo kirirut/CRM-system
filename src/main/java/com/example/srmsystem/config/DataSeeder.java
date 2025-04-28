@@ -4,10 +4,10 @@ import com.example.srmsystem.model.Customer;
 import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.CustomerRepository;
 import com.example.srmsystem.repository.OrderRepository;
+import com.github.javafaker.Faker;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,10 @@ public class DataSeeder {
     @Bean
     CommandLineRunner seedDatabase(CustomerRepository customerRepo, OrderRepository orderRepo) {
         return args -> {
-            if (customerRepo.count() > 0) return;
+            if (customerRepo.count() > 0) {
+                return;
+            }
+
 
             Faker faker = new Faker();
             List<Customer> customers = new ArrayList<>();

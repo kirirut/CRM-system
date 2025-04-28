@@ -26,7 +26,6 @@ public class CacheConfig {
         return allCustomersCache.get(ALL_CUSTOMERS_CACHE_KEY);
     }
 
-    // Добавление всех Customers в кэш
     public void putAllCustomers(List<Customer> customers) {
         List<DisplayCustomerDto> displayCustomerDtos = customers.stream()
                 .map(this::toDisplayCustomerDto)
@@ -92,4 +91,5 @@ public class CacheConfig {
                 order.getUpdatedAt()
         );
     }
-};
+
+}

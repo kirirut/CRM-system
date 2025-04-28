@@ -10,13 +10,13 @@ import com.example.srmsystem.model.Customer;
 import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.CustomerRepository;
 import com.example.srmsystem.repository.OrderRepository;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class OrderService {
@@ -91,7 +91,7 @@ public class OrderService {
     public DisplayOrderDto createOrderForCustomer(Long customerId, CreateOrderDto createOrderDto) {
         log.info("Creating order for customer with ID: {}", customerId);
 
-        List<String> errors = new ArrayList<> ();
+        List<String> errors = new ArrayList<>();
         if (createOrderDto.getDescription() == null || createOrderDto.getDescription().trim().isEmpty()) {
             errors.add("Description cannot be empty");
         }
@@ -120,6 +120,11 @@ public class OrderService {
     public DisplayOrderDto updateOrder(Long customerId, Long orderId, CreateOrderDto createOrderDto) {
         log.info("Updating order with ID: {} for customer with ID: {}", orderId, customerId);
 
+        if (!customerRepository.existsById(customerId)) {
+            log.error("Customer with ID: {} not found", customerId);
+            throw new EntityNotFoundException("Customer not found");
+        }
+
         List<String> errors = new ArrayList<>();
         if (createOrderDto.getDescription() == null || createOrderDto.getDescription().trim().isEmpty()) {
             errors.add("Description cannot be empty");
@@ -128,7 +133,7 @@ public class OrderService {
             errors.add("Order date cannot be null");
         }
         if (!errors.isEmpty()) {
-            throw new ValidationException (errors);
+            throw new ValidationException(errors);
         }
 
         Order order = orderRepository.findByCustomerIdAndId(customerId, orderId);
@@ -143,6 +148,7 @@ public class OrderService {
 
         Order updatedOrder = orderRepository.save(order);
         cacheConfig.putAllOrders(orderRepository.findByCustomerId(customerId));
+
         log.info("Order with ID: {} successfully updated for customer with ID: {}", updatedOrder.getId(), customerId);
         return orderMapper.toDisplayOrderDto(updatedOrder);
     }
@@ -150,6 +156,11 @@ public class OrderService {
     @Transactional
     public void deleteOrder(Long customerId, Long orderId) {
         log.info("Deleting order with ID: {} for customer with ID: {}", orderId, customerId);
+
+        if (!customerRepository.existsById(customerId)) {
+            log.error("Customer with ID: {} not found", customerId);
+            throw new EntityNotFoundException("Customer not found");
+        }
 
         Order order = orderRepository.findByCustomerIdAndId(customerId, orderId);
         if (order == null) {
@@ -159,6 +170,7 @@ public class OrderService {
 
         orderRepository.delete(order);
         cacheConfig.removeAllOrders();
+
         log.info("Order with ID: {} successfully deleted for customer with ID: {}", orderId, customerId);
     }
 }

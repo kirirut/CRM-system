@@ -1,7 +1,6 @@
 package com.example.srmsystem.repository;
 
 import com.example.srmsystem.model.Order;
-
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
 
     // Native SQL — по дате (отбрасываем время)
+    @SuppressWarnings("checkstyle:WhitespaceAround")
     @Query(value ="SELECT * FROM orders WHERE DATE(order_date)=:date", nativeQuery = true)
     List<Order> findByOrderDate(@Param("date") LocalDate date);
 

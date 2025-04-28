@@ -36,8 +36,7 @@ public final class CustomerMapper {
 
         List<DisplayOrderDto> orders = customer.getOrders()
                 .stream()
-                .map(order -> new DisplayOrderDto (
-                        order.getId(),
+                .map(order -> new DisplayOrderDto(order.getId(),
                         order.getDescription(),
                         order.getOrderDate(),
                         customer.getId(),

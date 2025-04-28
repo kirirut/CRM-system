@@ -7,20 +7,17 @@ import com.example.srmsystem.exception.EntityNotFoundException;
 import com.example.srmsystem.exception.NoContentException;
 import com.example.srmsystem.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
-
+import java.util.List;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 
 
 @Slf4j
@@ -39,14 +36,15 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список заказов получен"),
             @ApiResponse(responseCode = "204", description = "Список заказов пуст"),
-            @ApiResponse(responseCode = "404", description = "Некорректный ID клиента")
+            @ApiResponse(responseCode = "404", description = "Некорректный ID клиента"),
+            @ApiResponse(responseCode = "409", description = "Такой клиент уже существует")
     })
     @GetMapping
     public ResponseEntity<List<DisplayOrderDto>> getAllOrders(@PathVariable Long customerId) {
         log.info("Received request to get all orders for customer with ID {}", customerId);
         if (customerId == null || customerId <= 0) {
             log.warn("Invalid customer ID: {}", customerId);
-            throw new BadRequestException ("Invalid customer ID:" + customerId);
+            throw new BadRequestException("Invalid customer ID:" + customerId);
         }
         List<DisplayOrderDto> orders = orderService.getAllOrdersByCustomerId(customerId);
         if (orders == null || orders.isEmpty()) {
@@ -56,7 +54,6 @@ public class OrderController {
         log.info("Found {} orders for customer with ID {}", orders.size(), customerId);
         return ResponseEntity.ok(orders);
     }
-
 
     @Operation(summary = "Получить заказ клиента по ID")
     @ApiResponses(value = {
@@ -69,10 +66,10 @@ public class OrderController {
 
         DisplayOrderDto order = orderService.getOrderById(customerId, orderId);
         if (order == null) {
-            log.warn ( "Order with ID {} for customer with ID {} not found", orderId, customerId );
-            throw new NoContentException ( String.format ( "Order with ID %d for customer with ID %d not found", orderId, customerId ) );
+            log.warn("Order with ID {} for customer with ID {} not found", orderId, customerId);
+            throw new EntityNotFoundException(String.format("Order with ID %d for customer with ID %d not found", orderId, customerId));
         }
-            log.info("Order with ID {} for customer with ID {} successfully found", orderId, customerId);
+        log.info("Order with ID {} for customer with ID {} successfully found", orderId, customerId);
         return ResponseEntity.ok(order);
     }
 
@@ -102,12 +99,11 @@ public class OrderController {
         DisplayOrderDto updatedOrder = orderService.updateOrder(customerId, orderId, createOrderDto);
         if (updatedOrder == null) {
             log.warn("Order ID {} for customer ID {} not found", orderId, customerId);
-            throw new EntityNotFoundException ("Order with ID " + orderId + " for customer ID " + customerId + " not found");
+            throw new EntityNotFoundException("Order with ID " + orderId + " for customer ID " + customerId + " not found");
         }
         log.info("Order ID {} for customer ID {} successfully updated", orderId, customerId);
         return ResponseEntity.ok(updatedOrder);
     }
-
 
     @Operation(summary = "Удалить заказ клиента")
     @ApiResponses(value = {

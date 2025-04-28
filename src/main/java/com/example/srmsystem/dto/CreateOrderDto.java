@@ -17,4 +17,8 @@ public class CreateOrderDto {
 
     private Long customerId;
 
+    public CreateOrderDto(String description, LocalDateTime orderDate) {
+        this.description = description;
+        this.orderDate = orderDate;
+    }
 }
