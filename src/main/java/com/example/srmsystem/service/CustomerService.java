@@ -36,19 +36,14 @@ public class CustomerService {
 
     public List<DisplayCustomerDto> getAllCustomers() {
         log.info("Fetching all customers");
-        List<DisplayCustomerDto> cachedCustomers = cacheConfig.getAllCustomers();
-        if (cachedCustomers != null) {
-            log.info("Customers found in cache");
-            return cachedCustomers;
-        }
         List<Customer> customers = customerRepository.findAll();
         List<DisplayCustomerDto> displayCustomerDtos = customers.stream()
                 .map(customerMapper::toDisplayCustomerDto)
                 .collect(Collectors.toList());
-        cacheConfig.putAllCustomers(customers);
         log.info("Fetched {} customers from database", displayCustomerDtos.size());
         return displayCustomerDtos;
     }
+
 
     public DisplayCustomerDto getCustomerById(final Long id) {
         log.info("Fetching customer with ID: {}", id);
