@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -25,13 +27,16 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final CacheConfig cacheConfig;
+    private final PasswordEncoder passwordEncoder;
 
     public CustomerService(CustomerRepository customerRepository,
                            CustomerMapper customerMapper,
-                           CacheConfig cacheConfig) {
+                           CacheConfig cacheConfig,
+                           PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
         this.customerMapper = customerMapper;
         this.cacheConfig = cacheConfig;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<DisplayCustomerDto> getAllCustomers() {
@@ -43,6 +48,14 @@ public class CustomerService {
         log.info("Fetched {} customers from database", displayCustomerDtos.size());
         return displayCustomerDtos;
     }
+
+    public DisplayCustomerDto getCustomerByUsername(String username) {
+        Customer customer = customerRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return customerMapper.toDisplayCustomerDto(customer);
+    }
+
 
 
     public DisplayCustomerDto getCustomerById(final Long id) {
@@ -70,6 +83,7 @@ public class CustomerService {
         log.info("Customer with ID {} successfully fetched from database", id);
         return displayCustomerDto;
     }
+
 
     public DisplayCustomerDto createCustomer(final CreateCustomerDto dto) {
         List<String> errors = new ArrayList<>();
