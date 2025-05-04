@@ -8,11 +8,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class LogController {
 
-    private static final Path LOG_FILE_PATH = Paths.get("logs/srmsystem.log");
 
     @Operation(summary = "Получить логи по дате",
             description = "Получение логов, содержащих указанную дату, из файла логов.")
@@ -45,7 +42,7 @@ public class LogController {
         }
         if (!Files.exists(logFilePath)) {
             log.warn("Log file not found for date: {}", date);
-            throw new EntityNotFoundException ("Log file not found for date: " + date);
+            throw new EntityNotFoundException("Log file not found for date: " + date);
         }
         try {
             String content = Files.readString(logFilePath);
@@ -55,9 +52,10 @@ public class LogController {
                     .body(content);
         } catch (IOException e) {
             log.error("Failed to read log file for date: {}", date, e);
-            throw new AppException ("Something want wrong when reading log file for date: " + date, e);
+            throw new AppException("Something want wrong when reading log file for date: " + date, e);
         }
     }
+
     @GetMapping("/limited")
     @Operation(summary = "Получить ограниченное количество логов по дате",
             description = "Возвращает указанное количество последних логов за конкретную дату.")
