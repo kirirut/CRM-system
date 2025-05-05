@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
 @Validated
 @Slf4j
 @Tag(name = "Customer Controller", description = "Управление клиентами: создание, обновление, удаление, просмотр")
@@ -34,7 +33,7 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @Operation(summary = "Получить список всех клиентов")
+    @Operation(summary = "Получить список всех клиентов", description = "Возвращает список всех клиентов. Если клиентов нет — возвращает 204 No Content.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список клиентов получен"),
             @ApiResponse(responseCode = "204", description = "Список клиентов пуст")
@@ -51,10 +50,10 @@ public class CustomerController {
         return ResponseEntity.ok(customers);
     }
 
-    @Operation(summary = "Получить клиента по ID")
+    @Operation(summary = "Получить клиента по ID", description = "Позволяет получить клиента по его идентификатору.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Клиент найден"),
-            @ApiResponse(responseCode = "400", description = "Некорректный ID"),
+            @ApiResponse(responseCode = "400", description = "Некорректный ID клиента"),
             @ApiResponse(responseCode = "404", description = "Клиент не найден")
     })
     @GetMapping("/{id}")
@@ -73,9 +72,10 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-    @Operation(summary = "Создать нового клиента")
+    @Operation(summary = "Создать нового клиента", description = "Создает нового клиента на основе переданных данных.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Клиент успешно создан")
+            @ApiResponse(responseCode = "201", description = "Клиент успешно создан"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные клиента")
     })
     @PostMapping
     public ResponseEntity<DisplayCustomerDto> addCustomer(@RequestBody @Valid CreateCustomerDto createCustomerDto) {
@@ -85,11 +85,12 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
     }
 
-    @Operation(summary = "Создать несколько клиентов (bulk)")
+    @Operation(summary = "Создать нескольких клиентов (bulk)", description = "Позволяет создать несколько клиентов одним запросом.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Клиенты успешно созданы"),
-            @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
-            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+            @ApiResponse(responseCode = "400", description = "Некорректные данные одного или нескольких клиентов"),
+            @ApiResponse(responseCode = "409", description = "Один или несколько клиентов уже существуют"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @PostMapping("/bulk")
     public ResponseEntity<List<DisplayCustomerDto>> addCustomersBulk(@RequestBody @Valid List<CreateCustomerDto> customerDtos) {
@@ -110,10 +111,10 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomers);
     }
 
-
-    @Operation(summary = "Обновить информацию о клиенте")
+    @Operation(summary = "Обновить информацию о клиенте", description = "Обновляет информацию о клиенте по идентификатору.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Клиент успешно обновлен"),
+            @ApiResponse(responseCode = "200", description = "Клиент успешно обновлён"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные клиента"),
             @ApiResponse(responseCode = "404", description = "Клиент не найден")
     })
     @PutMapping("/{id}")
@@ -129,11 +130,11 @@ public class CustomerController {
         }
     }
 
-    @Operation(summary = "Удалить клиента по ID")
+    @Operation(summary = "Удалить клиента по ID", description = "Удаляет клиента по указанному идентификатору.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Клиент успешно удален")
+            @ApiResponse(responseCode = "204", description = "Клиент успешно удалён"),
+            @ApiResponse(responseCode = "404", description = "Клиент не найден")
     })
-
     @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {

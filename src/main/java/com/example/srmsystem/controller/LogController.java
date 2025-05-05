@@ -1,7 +1,5 @@
 package com.example.srmsystem.controller;
 
-
-
 import com.example.srmsystem.exception.AppException;
 import com.example.srmsystem.exception.EntityNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,9 +20,11 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class LogController {
 
-
-    @Operation(summary = "Получить логи по дате",
-            description = "Получение логов, содержащих указанную дату, из файла логов.")
+    @Operation(
+            summary = "Получить логи по дате",
+            description = "Возвращает содержимое лог-файла за указанную дату. " +
+                    "Если дата равна текущей, используется файл logs/srmsystem.log, иначе - logs/srmsystem-<date>.log"
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Логи успешно получены"),
             @ApiResponse(responseCode = "204", description = "Логи не найдены для указанной даты"),
@@ -52,23 +52,29 @@ public class LogController {
                     .body(content);
         } catch (IOException e) {
             log.error("Failed to read log file for date: {}", date, e);
-            throw new AppException("Something want wrong when reading log file for date: " + date, e);
+            throw new AppException("Something went wrong when reading log file for date: " + date, e);
         }
     }
 
-    @GetMapping("/limited")
-    @Operation(summary = "Получить ограниченное количество логов по дате",
-            description = "Возвращает указанное количество последних логов за конкретную дату.")
+    @Operation(
+            summary = "Получить ограниченное количество логов по дате",
+            description = "Возвращает последние N строк из лог-файла за указанную дату. " +
+                    "Полезно при просмотре последних событий без загрузки всего файла."
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Логи успешно получены"),
-            @ApiResponse(responseCode = "404", description = "Файл логов за указанную дату не найден"),
-            @ApiResponse(responseCode = "500", description = "Ошибка при чтении файла логов")
+            @ApiResponse(responseCode = "404", description = "Файл логов не найден"),
+            @ApiResponse(responseCode = "400", description = "Некорректный параметр (например, отрицательное значение limit)"),
+            @ApiResponse(responseCode = "500", description = "Ошибка при чтении логов")
     })
+    @GetMapping("/limited")
     public ResponseEntity<String> getLogsByDateAndLimit(
-            @Parameter(description = "Дата в формате YYYY-MM-DD", required = true)
+            @Parameter(description = "Дата логов в формате YYYY-MM-DD", required = true, example = "2025-05-05")
             @RequestParam String date,
-            @Parameter(description = "Максимальное количество строк логов", required = true)
-            @RequestParam int limit) {
+
+            @Parameter(description = "Максимальное количество последних строк логов", required = true, example = "100")
+            @RequestParam int limit
+    ) {
 
         if (limit <= 0) {
             throw new IllegalArgumentException("Limit must be positive");
@@ -102,6 +108,4 @@ public class LogController {
             throw new AppException("Something went wrong when reading limited logs for date: " + date, e);
         }
     }
-
-
 }

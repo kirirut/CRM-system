@@ -25,10 +25,13 @@ public class OrderFilterController {
 
     private final OrderService orderService;
 
-    @Operation(summary = "Получить заказы по имени клиента")
+    @Operation(summary = "Получить заказы по имени клиента", description = "Этот эндпоинт позволяет получить все заказы, связанные с клиентом по имени.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Заказы найдены"),
-            @ApiResponse(responseCode = "404", description = "Заказы не найдены")
+            @ApiResponse(responseCode = "200", description = "Заказы найдены", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Order.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Заказы не найдены для указанного имени клиента")
     })
     @GetMapping("/customer")
     public List<Order> getOrdersByCustomerName(@RequestParam String name) {
@@ -36,11 +39,17 @@ public class OrderFilterController {
         return orderService.getOrdersByCustomerName(name);
     }
 
-    @Operation(summary = "Получить заказы по дате")
+    @Operation(summary = "Получить заказы по дате", description = "Этот эндпоинт позволяет получить все заказы, сделанные в указанный день.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Заказы найдены"),
-            @ApiResponse(responseCode = "400", description = "Неверный формат даты"),
-            @ApiResponse(responseCode = "404", description = "Заказы не найдены")
+            @ApiResponse(responseCode = "200", description = "Заказы найдены", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Order.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Неверный формат даты", content = {
+                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Error.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Заказы не найдены для указанной даты")
     })
     @GetMapping("/date")
     public List<Order> getOrdersByDate(
