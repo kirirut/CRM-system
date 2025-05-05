@@ -22,7 +22,8 @@ public class LogController {
 
     @Operation(
             summary = "Получить логи по дате",
-            description = "Возвращает содержимое лог-файла за указанную дату. " +
+            description = "Возвращает содержимое лог-файла за указанную дату. "
+                    +
                     "Если дата равна текущей, используется файл logs/srmsystem.log, иначе - logs/srmsystem-<date>.log"
     )
     @ApiResponses(value = {
@@ -58,7 +59,8 @@ public class LogController {
 
     @Operation(
             summary = "Получить ограниченное количество логов по дате",
-            description = "Возвращает последние N строк из лог-файла за указанную дату. " +
+            description = "Возвращает последние N строк из лог-файла за указанную дату. "
+                    +
                     "Полезно при просмотре последних событий без загрузки всего файла."
     )
     @ApiResponses(value = {

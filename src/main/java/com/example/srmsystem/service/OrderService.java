@@ -10,7 +10,6 @@ import com.example.srmsystem.model.Customer;
 import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.CustomerRepository;
 import com.example.srmsystem.repository.OrderRepository;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -175,6 +174,7 @@ public class OrderService {
 
         log.info("Order with ID: {} successfully deleted for customer with ID: {}", orderId, customerId);
     }
+
     public List<Order> getOrdersByCustomerName(String name) {
         log.info("Searching for orders by customer name: {}", name);
         List<Order> orders = orderRepository.findByCustomerName(name);
