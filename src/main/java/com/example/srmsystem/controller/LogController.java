@@ -1,6 +1,7 @@
 package com.example.srmsystem.controller;
 
 import com.example.srmsystem.exception.AppException;
+import com.example.srmsystem.exception.BadRequestException;
 import com.example.srmsystem.exception.EntityNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -79,7 +80,7 @@ public class LogController {
     ) {
 
         if (limit <= 0) {
-            throw new IllegalArgumentException("Limit must be positive");
+            throw new BadRequestException("Limit must be positive");
         }
 
         Path logFilePath;
