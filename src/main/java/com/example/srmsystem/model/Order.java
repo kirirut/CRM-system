@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.validator.constraints.NotBlank;
 
 
@@ -25,6 +26,7 @@ public class Order {
 
     private LocalDateTime orderDate;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;

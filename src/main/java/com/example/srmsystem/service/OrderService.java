@@ -10,6 +10,8 @@ import com.example.srmsystem.model.Customer;
 import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.CustomerRepository;
 import com.example.srmsystem.repository.OrderRepository;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -173,4 +175,26 @@ public class OrderService {
 
         log.info("Order with ID: {} successfully deleted for customer with ID: {}", orderId, customerId);
     }
+    public List<Order> getOrdersByCustomerName(String name) {
+        log.info("Searching for orders by customer name: {}", name);
+        List<Order> orders = orderRepository.findByCustomerName(name);
+        if (orders.isEmpty()) {
+            log.warn("No orders found for customer with name '{}'", name);
+            throw new EntityNotFoundException("Orders not found for customer with name: " + name);
+        }
+        log.info("Found {} orders for customer '{}'", orders.size(), name);
+        return orders;
+    }
+
+    public List<Order> getOrdersByDate(LocalDate date) {
+        log.info("Searching for orders by date: {}", date);
+        List<Order> orders = orderRepository.findByOrderDate(date);
+        if (orders.isEmpty()) {
+            log.warn("No orders found for date '{}'", date);
+            throw new EntityNotFoundException("Orders not found for date: " + date);
+        }
+        log.info("Found {} orders for date '{}'", orders.size(), date);
+        return orders;
+    }
+
 }
