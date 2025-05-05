@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -197,6 +198,53 @@ public class OrderServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> orderService.deleteOrder(CUSTOMER_ID, ORDER_ID));
     }
+    @Test
+    void getAllOrdersByCustomerId_whenCacheIsEmpty_thenReturnEmptyList() {
+        when(cacheConfig.getAllOrders()).thenReturn(Collections.emptyList());
+
+        List<DisplayOrderDto> result = orderService.getAllOrdersByCustomerId(CUSTOMER_ID);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(cacheConfig, times(1)).getAllOrders();
+    }
+    @Test
+    void createOrderForCustomer_shouldUpdateCache() {
+        CreateOrderDto dto = new CreateOrderDto("Order after cache", LocalDateTime.now());
+
+        when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
+        when(orderMapper.fromCreateOrderDto(dto, customer)).thenReturn(order);
+        when(orderRepository.save(order)).thenReturn(order);
+        when(orderMapper.toDisplayOrderDto(order)).thenReturn(new DisplayOrderDto());
+
+        orderService.createOrderForCustomer(CUSTOMER_ID, dto);
+
+        verify(cacheConfig, times(1)).putAllOrders(anyList());
+    }
+    @Test
+    void updateOrder_whenInvalid_thenDoNotSaveOrCache() {
+        CreateOrderDto dto = new CreateOrderDto("", null);
+
+        when(customerRepository.existsById(CUSTOMER_ID)).thenReturn(true);
+        when(orderRepository.findByCustomerIdAndId(CUSTOMER_ID, ORDER_ID)).thenReturn(order);
+
+        assertThrows(ValidationException.class, () -> orderService.updateOrder(CUSTOMER_ID, ORDER_ID, dto));
+
+        verify(orderRepository, never()).save(any());
+        verify(cacheConfig, never()).putAllOrders(anyList());
+    }
+
+    @Test
+    void getOrderById_whenCacheMissAndNotInDb_thenReturnNull() {
+        when(cacheConfig.getAllOrders()).thenReturn(null);
+        when(orderRepository.findByCustomerIdAndId(CUSTOMER_ID, ORDER_ID)).thenReturn(null);
+
+        DisplayOrderDto result = orderService.getOrderById(CUSTOMER_ID, ORDER_ID);
+
+        assertNull(result);
+        verify(orderRepository, times(1)).findByCustomerIdAndId(CUSTOMER_ID, ORDER_ID);
+    }
+
 
     @Test
     void deleteOrder_whenOrderNotFound_thenThrowEntityNotFoundException() {
@@ -281,5 +329,74 @@ public class OrderServiceTest {
 
         assertEquals("Order date cannot be null", exception.getErrors().get(0));
     }
+    @Test
+    void testGetAllOrdersByCustomerId_CacheMiss() {
+        // arrange
+        when(cacheConfig.getAllOrders()).thenReturn(null); // Кэш отсутствует
+
+        List<Order> ordersFromDb = List.of(order);
+        when(orderRepository.findByCustomerId(CUSTOMER_ID)).thenReturn(ordersFromDb);
+
+        DisplayOrderDto dto = new DisplayOrderDto(
+                ORDER_ID,
+                "Order description",
+                order.getOrderDate(),
+                CUSTOMER_ID,
+                "john_doe",
+                order.getCreatedAt(),
+                order.getUpdatedAt()
+        );
+        when(orderMapper.toDisplayOrderDto(order)).thenReturn(dto);
+
+        // act
+        List<DisplayOrderDto> result = orderService.getAllOrdersByCustomerId(CUSTOMER_ID);
+
+        // assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(dto, result.get(0));
+
+        verify(cacheConfig, times(1)).getAllOrders();
+        verify(orderRepository, times(1)).findByCustomerId(CUSTOMER_ID);
+        verify(orderMapper, times(1)).toDisplayOrderDto(order);
+        verify(cacheConfig, times(1)).putAllOrders(ordersFromDb);
+    }
+    @Test
+    void testGetOrdersByDate_Found() {
+        // arrange
+        LocalDate date = LocalDate.of(2024, 5, 5);
+        List<Order> orders = List.of(order);
+
+        when(orderRepository.findByOrderDate(date)).thenReturn(orders);
+
+        // act
+        List<Order> result = orderService.getOrdersByDate(date);
+
+        // assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(order, result.get(0));
+
+        verify(orderRepository, times(1)).findByOrderDate(date);
+    }
+    @Test
+    void testGetOrdersByCustomerName_Found() {
+        // arrange
+        String customerName = "John Doe";
+        List<Order> orders = List.of(order);
+
+        when(orderRepository.findByCustomerName(customerName)).thenReturn(orders);
+
+        // act
+        List<Order> result = orderService.getOrdersByCustomerName(customerName);
+
+        // assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(order, result.get(0));
+
+        verify(orderRepository, times(1)).findByCustomerName(customerName);
+    }
+
 
 }

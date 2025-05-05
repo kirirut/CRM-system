@@ -80,8 +80,10 @@ public class LogController {
     ) {
 
         if (limit <= 0) {
+            log.warn("Bad request: limit must be positive. Received limit={} for date={}", limit, date);
             throw new BadRequestException("Limit must be positive");
         }
+
 
         Path logFilePath;
         String today = java.time.LocalDate.now().toString();

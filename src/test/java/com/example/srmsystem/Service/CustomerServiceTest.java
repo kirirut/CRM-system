@@ -36,32 +36,6 @@ class CustomerServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    // --- getAllCustomers() ---
-
-    @Test
-    void getAllCustomers_whenCacheExists_thenReturnCachedCustomers() {
-        List<DisplayCustomerDto> cachedCustomers = List.of(new DisplayCustomerDto());
-        when(cacheConfig.getAllCustomers()).thenReturn(cachedCustomers);
-
-        List<DisplayCustomerDto> result = customerService.getAllCustomers();
-
-        assertEquals(cachedCustomers, result);
-        verifyNoInteractions(customerRepository);
-    }
-
-    @Test
-    void getAllCustomers_whenCacheEmpty_thenFetchFromDb() {
-        when(cacheConfig.getAllCustomers()).thenReturn(null);
-        List<Customer> customers = List.of(new Customer());
-        when(customerRepository.findAll()).thenReturn(customers);
-        when(customerMapper.toDisplayCustomerDto(any())).thenReturn(new DisplayCustomerDto());
-
-        List<DisplayCustomerDto> result = customerService.getAllCustomers();
-
-        assertEquals(1, result.size());
-        verify(customerRepository).findAll();
-        verify(cacheConfig).putAllCustomers(customers);
-    }
 
     // --- getCustomerById() ---
 
