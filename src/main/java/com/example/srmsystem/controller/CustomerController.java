@@ -1,12 +1,10 @@
 package com.example.srmsystem.controller;
 
 import com.example.srmsystem.dto.CreateCustomerDto;
-import com.example.srmsystem.dto.CustomerResponseDto;
 import com.example.srmsystem.dto.DisplayCustomerDto;
 import com.example.srmsystem.exception.BadRequestException;
 import com.example.srmsystem.exception.EntityNotFoundException;
 import com.example.srmsystem.exception.NoContentException;
-import com.example.srmsystem.security.JwtUtil;
 import com.example.srmsystem.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,11 +29,10 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
 
     private final CustomerService customerService;
-    private final JwtUtil jwtUtil;
 
     public CustomerController(final CustomerService customerService) {
         this.customerService = customerService;
-        this.jwtUtil = new JwtUtil();
+
     }
 
     @Operation(summary = "Получить список всех клиентов")
@@ -75,19 +72,6 @@ public class CustomerController {
         }
         log.info("Client with ID {} found", id);
         return ResponseEntity.ok(customer);
-    }
-
-    @Operation(summary = "Создать нового клиента")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Клиент успешно создан")
-    })
-    @PostMapping
-    public ResponseEntity<CustomerResponseDto> addCustomer(@RequestBody @Valid CreateCustomerDto createCustomerDto) {
-        log.info("Request to add client: {}", createCustomerDto);
-        DisplayCustomerDto createdCustomer = customerService.createCustomer(createCustomerDto);
-        log.info("Client created: {}", createdCustomer);
-        String jwtToken = jwtUtil.generateToken(createdCustomer.getUsername());
-        return ResponseEntity.status(HttpStatus.CREATED).body(new CustomerResponseDto (createdCustomer, jwtToken));
     }
 
     @Operation(summary = "Создать несколько клиентов (bulk)")

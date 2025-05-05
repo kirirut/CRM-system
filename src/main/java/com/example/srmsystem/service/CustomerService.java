@@ -11,6 +11,7 @@ import com.example.srmsystem.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +28,16 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final CacheConfig cacheConfig;
-    private final PasswordEncoder passwordEncoder;
+
 
     public CustomerService(CustomerRepository customerRepository,
                            CustomerMapper customerMapper,
-                           CacheConfig cacheConfig,
-                           PasswordEncoder passwordEncoder) {
+                           CacheConfig cacheConfig
+                           ) {
         this.customerRepository = customerRepository;
         this.customerMapper = customerMapper;
         this.cacheConfig = cacheConfig;
-        this.passwordEncoder = passwordEncoder;
+
     }
 
     public List<DisplayCustomerDto> getAllCustomers() {
@@ -55,7 +56,6 @@ public class CustomerService {
 
         return customerMapper.toDisplayCustomerDto(customer);
     }
-
 
 
     public DisplayCustomerDto getCustomerById(final Long id) {
