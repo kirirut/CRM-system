@@ -38,7 +38,7 @@ public class AsyncLogService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                Thread.sleep(15000);
+                Thread.sleep(20000);
 
                 String logFileNamePattern = "app-" + date.format(DATE_FORMATTER) + ".*.log";
                 Path logDirectoryPath = Paths.get(LOG_DIRECTORY);

@@ -35,12 +35,14 @@ public class VisitController {
             @ApiResponse(responseCode = "200", description = "Visit count retrieved",
                     content = @Content(mediaType = "application/json", schema = @Schema(type = "integer")))
     })
+
     @GetMapping("/result")
     public ResponseEntity<Long> getVisitCount(
             @Parameter(description = "URL to get visit count for", example = "/some/path") @RequestParam String url
     ) {
         return ResponseEntity.ok((long) visitService.getVisitCount(url));
     }
+
     @Operation(summary = "Clear visit data", description = "Clears all stored visit data.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Visit data cleared")
