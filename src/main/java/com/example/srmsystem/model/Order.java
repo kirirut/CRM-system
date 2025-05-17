@@ -47,6 +47,6 @@ public class Order {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        orderDate = LocalDateTime.now();
     }
 }

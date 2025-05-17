@@ -11,6 +11,7 @@ import com.example.srmsystem.model.Order;
 import com.example.srmsystem.repository.CustomerRepository;
 import com.example.srmsystem.repository.OrderRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -43,15 +44,6 @@ public class OrderService {
 
     public List<DisplayOrderDto> getAllOrdersByCustomerId(Long customerId) {
         log.info("Fetching orders for customer with ID: {}", customerId);
-
-        List<DisplayOrderDto> cachedOrders = cacheConfig.getAllOrders();
-        if (cachedOrders != null) {
-            log.info("Orders found in cache for customer with ID: {}", customerId);
-            return cachedOrders.stream()
-                    .filter(order -> order.getCustomerId().equals(customerId))
-                    .toList();
-        }
-
         log.info("No cached orders found for customer with ID: {}. Fetching from database.", customerId);
         List<Order> orders = orderRepository.findByCustomerId(customerId);
         List<DisplayOrderDto> displayOrderDtos = orders.stream()
@@ -64,18 +56,6 @@ public class OrderService {
 
     public DisplayOrderDto getOrderById(Long customerId, Long orderId) {
         log.info("Fetching order with ID: {} for customer with ID: {}", orderId, customerId);
-
-        List<DisplayOrderDto> cachedOrders = cacheConfig.getAllOrders();
-        if (cachedOrders != null) {
-            DisplayOrderDto orderDto = cachedOrders.stream()
-                    .filter(order -> order.getCustomerId().equals(customerId) && order.getId().equals(orderId))
-                    .findFirst()
-                    .orElse(null);
-            if (orderDto != null) {
-                log.info("Order with ID: {} found in cache for customer with ID: {}", orderId, customerId);
-                return orderDto;
-            }
-        }
 
         log.info("Order with ID: {} not found in cache. Fetching from database for customer with ID: {}", orderId, customerId);
         Order order = orderRepository.findByCustomerIdAndId(customerId, orderId);
@@ -95,12 +75,12 @@ public class OrderService {
         log.info("Creating order for customer with ID: {}", customerId);
 
         List<String> errors = new ArrayList<>();
+
+
         if (createOrderDto.getDescription() == null || createOrderDto.getDescription().trim().isEmpty()) {
             errors.add("Description cannot be empty");
         }
-        if (createOrderDto.getOrderDate() == null) {
-            errors.add("Order date cannot be null");
-        }
+
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
@@ -132,9 +112,6 @@ public class OrderService {
         if (createOrderDto.getDescription() == null || createOrderDto.getDescription().trim().isEmpty()) {
             errors.add("Description cannot be empty");
         }
-        if (createOrderDto.getOrderDate() == null) {
-            errors.add("Order date cannot be null");
-        }
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
@@ -147,7 +124,7 @@ public class OrderService {
 
         order.setDescription(createOrderDto.getDescription());
         order.setOrderDate(createOrderDto.getOrderDate());
-        order.setUpdatedAt(null);
+        order.setUpdatedAt(LocalDateTime.now());
 
         Order updatedOrder = orderRepository.save(order);
         cacheConfig.putAllOrders(orderRepository.findByCustomerId(customerId));

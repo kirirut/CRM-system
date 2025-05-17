@@ -45,7 +45,6 @@ const OrderFilterPage = () => {
 
     return (
         <div>
-            <h2>Фильтрация заказов</h2>
             {error && <Alert variant="danger">{error}</Alert>}
             <Form>
                 <Form.Group className="mb-3">
@@ -92,7 +91,6 @@ const OrderFilterPage = () => {
                     <Table striped bordered hover responsive className="mt-3">
                         <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Имя клиента</th>
                             <th>Дата заказа</th>
                             <th>Описание</th>
@@ -101,7 +99,6 @@ const OrderFilterPage = () => {
                         <tbody>
                         {orders.map((order) => (
                             <tr key={order.id}>
-                                <td>{order.id}</td>
                                 <td>{order.customer?.username || '-'}</td>
                                 <td>{order.orderDate ? new Date(order.orderDate).toLocaleString() : '-'}</td>
                                 <td>{order.description}</td>

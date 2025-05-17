@@ -80,7 +80,7 @@ public class OrderController {
     })
     @PostMapping
     public ResponseEntity<DisplayOrderDto> addOrderToCustomer(
-            @PathVariable Long customerId, @Valid @RequestBody CreateOrderDto createOrderDto) {
+            @PathVariable Long customerId,  @RequestBody CreateOrderDto createOrderDto) {
         log.info("Received request to create a new order for customer ID {}: {}", customerId, createOrderDto);
         DisplayOrderDto createdOrder = orderService.createOrderForCustomer(customerId, createOrderDto);
         log.info("Created order ID {} for customer ID {}", createdOrder.getId(), customerId);

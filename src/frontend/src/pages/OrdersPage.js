@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Spinner, Alert, Dropdown } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Spinner, Dropdown } from 'react-bootstrap';
 import { getCustomers, getOrdersByCustomer, getOrderById, createOrder, updateOrder, deleteOrder } from '../services/api';
 
 const OrdersPage = () => {
@@ -14,10 +14,7 @@ const OrdersPage = () => {
 
     useEffect(() => {
         fetchCustomers();
-        if (selectedCustomerId) {
-            fetchOrders();
-        }
-    }, [selectedCustomerId]);
+    }, []);
 
     const fetchCustomers = async () => {
         try {
@@ -28,10 +25,12 @@ const OrdersPage = () => {
         }
     };
 
-    const fetchOrders = async () => {
+    const fetchOrders = async (customerId) => {
         try {
             setLoading(true);
-            const data = await getOrdersByCustomer(selectedCustomerId);
+            setError('');
+            console.log('Fetching orders for customerId:', customerId); // Логирование перед запросом
+            const data = await getOrdersByCustomer(customerId);
             setOrders(data || []);
         } catch (err) {
             setError('Заказы для этого клиента не найдены');
@@ -49,15 +48,14 @@ const OrdersPage = () => {
         try {
             setError('');
             const orderData = { ...formData };
+            console.log('Sending order data:', { selectedCustomerId, orderData, editingOrderId }); // Логирование перед запросом
             if (editingOrderId) {
                 await updateOrder(selectedCustomerId, editingOrderId, orderData);
-                alert('Заказ успешно обновлен');
             } else {
                 await createOrder(selectedCustomerId, orderData);
-                alert('Заказ успешно создан');
             }
             resetModal();
-            fetchOrders();
+            fetchOrders(selectedCustomerId);
         } catch (err) {
             setError('Ошибка при сохранении заказа');
         }
@@ -66,6 +64,7 @@ const OrdersPage = () => {
     const handleEdit = async (orderId) => {
         try {
             setLoading(true);
+            console.log('Fetching order for edit with orderId:', orderId); // Логирование перед запросом
             const order = await getOrderById(selectedCustomerId, orderId);
             setFormData({ description: order.description || '' });
             setEditingOrderId(orderId);
@@ -78,14 +77,21 @@ const OrdersPage = () => {
     };
 
     const handleDelete = async (orderId) => {
-        if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
-            try {
-                await deleteOrder(selectedCustomerId, orderId);
-                alert('Заказ успешно удален');
-                fetchOrders();
-            } catch (err) {
-                setError('Ошибка при удалении заказа');
-            }
+        try {
+            console.log('Deleting order with orderId:', { selectedCustomerId, orderId }); // Логирование перед запросом
+            await deleteOrder(selectedCustomerId, orderId);
+            fetchOrders(selectedCustomerId);
+        } catch (err) {
+            setError('Ошибка при удалении заказа');
+        }
+    };
+
+    const handleCustomerSelect =  (customerId) => {
+        setSelectedCustomerId(customerId);
+        if (customerId) {
+            fetchOrders(customerId);
+        } else {
+            setOrders([]);
         }
     };
 
@@ -98,13 +104,13 @@ const OrdersPage = () => {
 
     return (
         <div>
-            <h2>Заказы</h2>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <Dropdown onSelect={(id) => setSelectedCustomerId(id)} className="mb-3">
+            <div className={error ? "text-danger mb-3" : "d-none"}>{error}</div>
+            <Dropdown onSelect={handleCustomerSelect} className="mb-3">
                 <Dropdown.Toggle variant="secondary">
                     {selectedCustomerId ? customers.find(c => c.id === parseInt(selectedCustomerId))?.username : 'Выберите клиента'}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
+                    <Dropdown.Item eventKey={null}>Выберите клиента</Dropdown.Item>
                     {customers.map((customer) => (
                         <Dropdown.Item key={customer.id} eventKey={customer.id}>
                             {customer.username}
@@ -125,7 +131,6 @@ const OrdersPage = () => {
                         <Table striped bordered hover responsive>
                             <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Описание</th>
                                 <th>Дата заказа</th>
                                 <th>Действия</th>
@@ -134,7 +139,6 @@ const OrdersPage = () => {
                             <tbody>
                             {orders && orders.map((order) => (
                                 <tr key={order.id}>
-                                    <td>{order.id}</td>
                                     <td>{order.description}</td>
                                     <td>{order.orderDate ? new Date(order.orderDate).toLocaleString() : '-'}</td>
                                     <td>
@@ -171,7 +175,7 @@ const OrdersPage = () => {
                             />
                         </Form.Group>
                     </Form>
-                    {error && <Alert variant="danger">{error}</Alert>}
+                    <div className={error ? "text-danger" : "d-none"}>{error}</div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={resetModal}>
