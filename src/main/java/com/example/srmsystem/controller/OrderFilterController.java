@@ -1,60 +1,68 @@
 package com.example.srmsystem.controller;
 
+import com.example.srmsystem.exception.EntityNotFoundException;
 import com.example.srmsystem.model.Order;
-import com.example.srmsystem.service.OrderService;
+import com.example.srmsystem.repository.OrderRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 
 @Validated
 @Slf4j
 @Tag(name = "Order Filter Controller", description = "Фильтрация заказов по имени клиента и дате заказа")
 @RestController
 @RequestMapping("/api/orders/filter")
-@RequiredArgsConstructor
 public class OrderFilterController {
 
-    private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
-    @Operation(summary = "Получить заказы по имени клиента", description = "Этот эндпоинт позволяет получить все заказы, связанные с клиентом по имени.")
+    public OrderFilterController(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
+    @Operation(summary = "Получить заказы по имени клиента")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Заказы найдены", content = {
-                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Order.class))
-            }),
-            @ApiResponse(responseCode = "404", description = "Заказы не найдены для указанного имени клиента")
+            @ApiResponse(responseCode = "200", description = "Заказы найдены"),
+            @ApiResponse(responseCode = "404", description = "Заказы не найдены")
     })
     @GetMapping("/customer")
     public List<Order> getOrdersByCustomerName(@RequestParam String name) {
         log.info("Запрос на получение заказов по имени клиента: {}", name);
-        return orderService.getOrdersByCustomerName(name);
+        List<Order> orders = orderRepository.findByCustomerName(name);
+        if (orders.isEmpty()) {
+            log.warn("No orders found for customer with name '{}'", name);
+            throw new EntityNotFoundException("Orders not found for customer with name: " + name);
+        } else {
+            log.info("Found {} orders for customer with name '{}'", orders.size(), name);
+        }
+        return orders;
     }
 
-    @Operation(summary = "Получить заказы по дате", description = "Этот эндпоинт позволяет получить все заказы, сделанные в указанный день.")
+    @Operation(summary = "Получить заказы по дате")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Заказы найдены", content = {
-                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Order.class))
-            }),
-            @ApiResponse(responseCode = "400", description = "Неверный формат даты", content = {
-                    @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Error.class))
-            }),
-            @ApiResponse(responseCode = "404", description = "Заказы не найдены для указанной даты")
+            @ApiResponse(responseCode = "200", description = "Заказы найдены"),
+            @ApiResponse(responseCode = "400", description = "Неверный формат даты"),
+            @ApiResponse(responseCode = "404", description = "Заказы не найдены")
     })
     @GetMapping("/date")
     public List<Order> getOrdersByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        log.info("Запрос на получение заказов по дате: {}", date);
-        return orderService.getOrdersByDate(date);
+        log.info("Request to get orders for date: {}", date);
+        List<Order> orders = orderRepository.findByOrderDate(date);
+        if (orders.isEmpty()) {
+            log.warn("No orders found for date '{}'", date);
+            throw new EntityNotFoundException("Orders not found for date: " + date);
+        } else {
+            log.info("Found {} orders for date '{}'", orders.size(), date);
+        }
+        return orders;
     }
 }

@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+
 @Slf4j
 @Tag(name = "Order Controller", description = "Управление заказами клиента: создание, обновление, удаление, просмотр")
 @RestController
@@ -34,8 +36,8 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список заказов получен"),
             @ApiResponse(responseCode = "204", description = "Список заказов пуст"),
-            @ApiResponse(responseCode = "400", description = "Некорректный ID клиента"),
-            @ApiResponse(responseCode = "404", description = "Клиент не найден")
+            @ApiResponse(responseCode = "404", description = "Некорректный ID клиента"),
+            @ApiResponse(responseCode = "409", description = "Такой клиент уже существует")
     })
     @GetMapping
     public ResponseEntity<List<DisplayOrderDto>> getAllOrders(@PathVariable Long customerId) {
