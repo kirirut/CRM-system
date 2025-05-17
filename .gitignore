@@ -18,7 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
-
+/src/main/java/com/example/srmsystem/config/LocalEnvConfig.java
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
