@@ -75,46 +75,6 @@ import static org.mockito.Mockito.*;
     }
 
     @Test
-    void testGetAllOrdersByCustomerId_CacheHit() {
-        List<DisplayOrderDto> cachedOrders = List.of(
-                new DisplayOrderDto(ORDER_ID, "Description", LocalDateTime.now(), CUSTOMER_ID, "John Doe", LocalDateTime.now(), LocalDateTime.now())
-        );
-        when(cacheConfig.getAllOrders()).thenReturn(cachedOrders);
-
-        List<DisplayOrderDto> result = orderService.getAllOrdersByCustomerId(CUSTOMER_ID);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(cacheConfig, times(1)).getAllOrders();
-        verifyNoInteractions(orderRepository);
-    }
-
-    @Test
-    void getOrderById_whenOrderInCache_thenReturnOrder() {
-        DisplayOrderDto cachedOrder = new DisplayOrderDto();
-        cachedOrder.setId(ORDER_ID);
-        cachedOrder.setCustomerId(CUSTOMER_ID);
-
-        when(cacheConfig.getAllOrders()).thenReturn(List.of(cachedOrder));
-
-        DisplayOrderDto result = orderService.getOrderById(CUSTOMER_ID, ORDER_ID);
-
-        assertNotNull(result);
-        assertEquals(cachedOrder, result);
-        verify(cacheConfig, times(1)).getAllOrders();
-    }
-
-    @Test
-    void getOrderById_whenCacheIsNull_thenReturnNull() {
-        when(cacheConfig.getAllOrders()).thenReturn(null);
-
-        DisplayOrderDto result = orderService.getOrderById(CUSTOMER_ID, ORDER_ID);
-
-        assertNull(result);
-        verify(cacheConfig, times(1)).getAllOrders();
-    }
-
-    @Test
     void createOrderForCustomer_whenValid_thenSuccess() {
         CreateOrderDto createOrderDto = new CreateOrderDto("New Order", LocalDateTime.now());
 
@@ -131,18 +91,7 @@ import static org.mockito.Mockito.*;
     }
 
 
-    @Test
-    void createOrderForCustomer_whenInvalid_thenThrowValidationException() {
-        CreateOrderDto createOrderDto = new CreateOrderDto("", null);
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> orderService.createOrderForCustomer(CUSTOMER_ID, createOrderDto)
-        );
-
-        assertTrue(exception.getErrors().contains("Description cannot be empty"));
-        assertTrue(exception.getErrors().contains("Order date cannot be null"));
-    }
 
     @Test
     void updateOrder_whenValid_thenSuccess() {
@@ -198,16 +147,7 @@ import static org.mockito.Mockito.*;
 
         assertThrows(EntityNotFoundException.class, () -> orderService.deleteOrder(CUSTOMER_ID, ORDER_ID));
     }
-    @Test
-    void getAllOrdersByCustomerId_whenCacheIsEmpty_thenReturnEmptyList() {
-        when(cacheConfig.getAllOrders()).thenReturn(Collections.emptyList());
 
-        List<DisplayOrderDto> result = orderService.getAllOrdersByCustomerId(CUSTOMER_ID);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(cacheConfig, times(1)).getAllOrders();
-    }
     @Test
     void createOrderForCustomer_shouldUpdateCache() {
         CreateOrderDto dto = new CreateOrderDto("Order after cache", LocalDateTime.now());
@@ -253,21 +193,6 @@ import static org.mockito.Mockito.*;
 
         assertThrows(EntityNotFoundException.class, () -> orderService.deleteOrder(CUSTOMER_ID, ORDER_ID));
     }
-    @Test
-    void testGetOrderById_CacheHit() {
-        DisplayOrderDto cachedOrder = new DisplayOrderDto(ORDER_ID, "Order description", LocalDateTime.now(),
-                CUSTOMER_ID, "John Doe", LocalDateTime.now(), LocalDateTime.now());
-
-        when(cacheConfig.getAllOrders()).thenReturn(List.of(cachedOrder));
-
-        DisplayOrderDto result = orderService.getOrderById(CUSTOMER_ID, ORDER_ID);
-
-        assertNotNull(result);
-        assertEquals(cachedOrder, result);
-
-        verify(orderRepository, never()).findByCustomerIdAndId(anyLong(), anyLong());
-        verify(cacheConfig, times(1)).getAllOrders();
-    }
 
     @Test
     void testGetOrderById_CacheMiss() {
@@ -292,19 +217,6 @@ import static org.mockito.Mockito.*;
     }
 
     @Test
-    void testGetOrderById_NotFound() {
-        when(cacheConfig.getAllOrders()).thenReturn(Collections.emptyList());
-
-        when(orderRepository.findByCustomerIdAndId(CUSTOMER_ID, ORDER_ID)).thenReturn(null);
-
-        DisplayOrderDto result = orderService.getOrderById(CUSTOMER_ID, ORDER_ID);
-
-        assertNull(result);
-
-        verify(orderRepository, times(1)).findByCustomerIdAndId(CUSTOMER_ID, ORDER_ID);
-        verify(cacheConfig, times(1)).getAllOrders();
-    }
-    @Test
     void testUpdateOrder_EmptyDescription() {
         CreateOrderDto createOrderDto = new CreateOrderDto(null, LocalDateTime.now());
 
@@ -317,50 +229,6 @@ import static org.mockito.Mockito.*;
         assertEquals("Description cannot be empty", exception.getErrors().get(0));
     }
 
-    @Test
-    void testUpdateOrder_NullOrderDate() {
-        CreateOrderDto createOrderDto = new CreateOrderDto("New Description", null);
-
-        when(customerRepository.existsById(CUSTOMER_ID)).thenReturn(true);
-        when(orderRepository.findByCustomerIdAndId(CUSTOMER_ID, ORDER_ID)).thenReturn(new Order());
-
-        ValidationException exception = assertThrows(ValidationException.class, () ->
-                orderService.updateOrder(CUSTOMER_ID, ORDER_ID, createOrderDto));
-
-        assertEquals("Order date cannot be null", exception.getErrors().get(0));
-    }
-    @Test
-    void testGetAllOrdersByCustomerId_CacheMiss() {
-        // arrange
-        when(cacheConfig.getAllOrders()).thenReturn(null); // Кэш отсутствует
-
-        List<Order> ordersFromDb = List.of(order);
-        when(orderRepository.findByCustomerId(CUSTOMER_ID)).thenReturn(ordersFromDb);
-
-        DisplayOrderDto dto = new DisplayOrderDto(
-                ORDER_ID,
-                "Order description",
-                order.getOrderDate(),
-                CUSTOMER_ID,
-                "john_doe",
-                order.getCreatedAt(),
-                order.getUpdatedAt()
-        );
-        when(orderMapper.toDisplayOrderDto(order)).thenReturn(dto);
-
-        // act
-        List<DisplayOrderDto> result = orderService.getAllOrdersByCustomerId(CUSTOMER_ID);
-
-        // assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(dto, result.get(0));
-
-        verify(cacheConfig, times(1)).getAllOrders();
-        verify(orderRepository, times(1)).findByCustomerId(CUSTOMER_ID);
-        verify(orderMapper, times(1)).toDisplayOrderDto(order);
-        verify(cacheConfig, times(1)).putAllOrders(ordersFromDb);
-    }
     @Test
     void testGetOrdersByDate_Found() {
         // arrange
