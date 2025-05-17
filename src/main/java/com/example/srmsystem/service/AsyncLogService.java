@@ -78,15 +78,22 @@ public class AsyncLogService {
 
                 logFile.setStatus(LogStatus.COMPLETED);
                 logFile.setFilePath(combinedLogFilePath.toString());
-            } catch (IOException | InterruptedException e) {
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logFile.setStatus(LogStatus.FAILED);
+                logFile.setErrorMessage("Thread was interrupted: " + e.getMessage());
+                log.error("Thread was interrupted while creating log file", e);
+            } catch (IOException e) {
                 logFile.setStatus(LogStatus.FAILED);
                 logFile.setErrorMessage(e.getMessage());
-                log.error("Error creating log file", e);
+                log.error("IO Error creating log file", e);
             }
         });
 
         return CompletableFuture.completedFuture(logId);
     }
+
 
     public LogCreationStatusDto getLogCreationStatus(UUID logId) {
         LogFile logFile = logFiles.get(logId.toString());

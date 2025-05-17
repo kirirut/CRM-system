@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+    private static final String CUSTOMER_NOT_FOUND_LOG_MSG = "Customer with ID: {} not found";
+    private static final String ORDER_NOT_FOUND_LOG_MSG = "Order with ID: {} not found for customer with ID: {}";
 
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
@@ -78,7 +80,7 @@ public class OrderService {
         log.info("Order with ID: {} not found in cache. Fetching from database for customer with ID: {}", orderId, customerId);
         Order order = orderRepository.findByCustomerIdAndId(customerId, orderId);
         if (order == null) {
-            log.error("Order with ID: {} not found for customer with ID: {}", orderId, customerId);
+            log.error(ORDER_NOT_FOUND_LOG_MSG, orderId, customerId);
             return null;
         }
 
@@ -105,7 +107,7 @@ public class OrderService {
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> {
-                    log.error("Customer with ID: {} not found", customerId);
+                    log.error(CUSTOMER_NOT_FOUND_LOG_MSG, customerId);
                     return new EntityNotFoundException("Customer not found");
                 });
 
@@ -122,7 +124,7 @@ public class OrderService {
         log.info("Updating order with ID: {} for customer with ID: {}", orderId, customerId);
 
         if (!customerRepository.existsById(customerId)) {
-            log.error("Customer with ID: {} not found", customerId);
+            log.error(CUSTOMER_NOT_FOUND_LOG_MSG, customerId);
             throw new EntityNotFoundException("Customer not found");
         }
 
@@ -139,7 +141,7 @@ public class OrderService {
 
         Order order = orderRepository.findByCustomerIdAndId(customerId, orderId);
         if (order == null) {
-            log.error("Order with ID: {} not found for customer with ID: {}", orderId, customerId);
+            log.error(ORDER_NOT_FOUND_LOG_MSG, orderId, customerId);
             throw new EntityNotFoundException("Order not found");
         }
 
@@ -159,13 +161,13 @@ public class OrderService {
         log.info("Deleting order with ID: {} for customer with ID: {}", orderId, customerId);
 
         if (!customerRepository.existsById(customerId)) {
-            log.error("Customer with ID: {} not found", customerId);
+            log.error(CUSTOMER_NOT_FOUND_LOG_MSG, customerId);
             throw new EntityNotFoundException("Customer not found");
         }
 
         Order order = orderRepository.findByCustomerIdAndId(customerId, orderId);
         if (order == null) {
-            log.error("Order with ID: {} not found for customer with ID: {}", orderId, customerId);
+            log.error(ORDER_NOT_FOUND_LOG_MSG, orderId, customerId);
             throw new EntityNotFoundException("Order not found");
         }
 

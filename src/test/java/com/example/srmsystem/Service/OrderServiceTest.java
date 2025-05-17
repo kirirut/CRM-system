@@ -24,7 +24,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class OrderServiceTest {
+    class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
@@ -48,7 +48,7 @@ public class OrderServiceTest {
     private Order order;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
 
         customer = new Customer(
@@ -75,7 +75,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void testGetAllOrdersByCustomerId_CacheHit() {
+    void testGetAllOrdersByCustomerId_CacheHit() {
         List<DisplayOrderDto> cachedOrders = List.of(
                 new DisplayOrderDto(ORDER_ID, "Description", LocalDateTime.now(), CUSTOMER_ID, "John Doe", LocalDateTime.now(), LocalDateTime.now())
         );

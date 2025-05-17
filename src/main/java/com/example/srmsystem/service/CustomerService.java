@@ -11,16 +11,38 @@ import com.example.srmsystem.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-
-
 @Service
 public class CustomerService {
+
     private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
+
+    private static final String USERNAME_BLANK = "Username must not be blank";
+    private static final String USERNAME_LENGTH = "Username must be between 3 and 20 characters";
+    private static final String PASSWORD_BLANK = "Password must not be blank";
+    private static final String PASSWORD_LENGTH = "Password must be at least 6 characters";
+    private static final String EMAIL_BLANK = "Email must not be blank";
+    private static final String EMAIL_INVALID = "Email must be valid";
+
+    private static final String EMAIL_REGEX = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+
+    private static final String LOG_FETCHING_CUSTOMER = "Fetching customer with ID: {}";
+    private static final String LOG_FOUND_IN_CACHE = "Customer with ID {} found in cache";
+    private static final String LOG_NOT_FOUND = "Customer with ID {} not found";
+    private static final String LOG_SUCCESSFULLY_FETCHED = "Customer with ID {} successfully fetched from database";
+    private static final String LOG_CREATING_CUSTOMER = "Creating new customer with username: {}";
+    private static final String LOG_CUSTOMER_CREATED = "Customer with ID {} created successfully";
+    private static final String LOG_UPDATING_CUSTOMER = "Updating customer with ID: {}";
+    private static final String LOG_CUSTOMER_UPDATED = "Customer with ID {} updated successfully";
+    private static final String LOG_DELETING_CUSTOMER = "Deleting customer with ID: {}";
+    private static final String LOG_CUSTOMER_DELETED = "Customer with ID {} successfully deleted";
+    private static final String LOG_FETCHING_ALL = "Fetching all customers";
+    private static final String LOG_FETCHED_ALL = "Fetched {} customers from database";
+
+    private static final String CUSTOMER_NOT_FOUND = "Customer not found with id: %d";
 
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
@@ -35,18 +57,17 @@ public class CustomerService {
     }
 
     public List<DisplayCustomerDto> getAllCustomers() {
-        log.info("Fetching all customers");
+        log.info(LOG_FETCHING_ALL);
         List<Customer> customers = customerRepository.findAll();
         List<DisplayCustomerDto> displayCustomerDtos = customers.stream()
                 .map(customerMapper::toDisplayCustomerDto)
-                .collect(Collectors.toList());
-        log.info("Fetched {} customers from database", displayCustomerDtos.size());
+                .toList();
+        log.info(LOG_FETCHED_ALL, displayCustomerDtos.size());
         return displayCustomerDtos;
     }
 
-
     public DisplayCustomerDto getCustomerById(final Long id) {
-        log.info("Fetching customer with ID: {}", id);
+        log.info(LOG_FETCHING_CUSTOMER, id);
         List<DisplayCustomerDto> cachedCustomers = cacheConfig.getAllCustomers();
         if (cachedCustomers != null) {
             DisplayCustomerDto customerDto = cachedCustomers.stream()
@@ -54,92 +75,49 @@ public class CustomerService {
                     .findFirst()
                     .orElse(null);
             if (customerDto != null) {
-                log.info("Customer with ID {} found in cache", id);
+                log.info(LOG_FOUND_IN_CACHE, id);
                 return customerDto;
             }
         }
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Customer with ID {} not found", id);
-                    return new EntityNotFoundException(
-                            String.format("Customer not found with id: %d", id)
-                    );
+                    log.error(LOG_NOT_FOUND, id);
+                    return new EntityNotFoundException(String.format(CUSTOMER_NOT_FOUND, id));
                 });
         DisplayCustomerDto displayCustomerDto = customerMapper.toDisplayCustomerDto(customer);
         cacheConfig.putAllCustomers(customerRepository.findAll());
-        log.info("Customer with ID {} successfully fetched from database", id);
+        log.info(LOG_SUCCESSFULLY_FETCHED, id);
         return displayCustomerDto;
     }
 
     public DisplayCustomerDto createCustomer(final CreateCustomerDto dto) {
-        List<String> errors = new ArrayList<>();
-
-        if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
-            errors.add("Username must not be blank");
-        } else if (dto.getUsername().length() < 3 || dto.getUsername().length() > 20) {
-            errors.add("Username must be between 3 and 20 characters");
-        }
-
-        if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
-            errors.add("Password must not be blank");
-        } else if (dto.getPassword().length() < 6) {
-            errors.add("Password must be at least 6 characters");
-        }
-
-        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
-            errors.add("Email must not be blank");
-        } else if (!dto.getEmail().matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            errors.add("Email must be valid");
-        }
-
+        List<String> errors = validateCustomerDto(dto);
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
 
-        log.info("Creating new customer with username: {}", dto.getUsername());
+        log.info(LOG_CREATING_CUSTOMER, dto.getUsername());
 
         Customer customer = customerMapper.fromCreateCustomerDto(dto);
         Customer saved = customerRepository.save(customer);
         cacheConfig.putAllCustomers(customerRepository.findAll());
 
-        log.info("Customer with ID {} created successfully", saved.getId());
+        log.info(LOG_CUSTOMER_CREATED, saved.getId());
         return customerMapper.toDisplayCustomerDto(saved);
     }
 
-
     public DisplayCustomerDto updateCustomer(final Long id, final CreateCustomerDto dto) {
-        List<String> errors = new ArrayList<>();
-
-        if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
-            errors.add("Username must not be blank");
-        } else if (dto.getUsername().length() < 3 || dto.getUsername().length() > 20) {
-            errors.add("Username must be between 3 and 20 characters");
-        }
-
-        if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
-            errors.add("Password must not be blank");
-        } else if (dto.getPassword().length() < 6) {
-            errors.add("Password must be at least 6 characters");
-        }
-
-        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
-            errors.add("Email must not be blank");
-        } else if (!dto.getEmail().matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            errors.add("Email must be valid");
-        }
-
+        List<String> errors = validateCustomerDto(dto);
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
 
-        log.info("Updating customer with ID: {}", id);
+        log.info(LOG_UPDATING_CUSTOMER, id);
 
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Customer with ID {} not found", id);
-                    return new EntityNotFoundException(
-                            String.format("Customer not found with id: %d", id)
-                    );
+                    log.error(LOG_NOT_FOUND, id);
+                    return new EntityNotFoundException(String.format(CUSTOMER_NOT_FOUND, id));
                 });
 
         customer.setUsername(dto.getUsername());
@@ -152,7 +130,7 @@ public class CustomerService {
         Customer saved = customerRepository.save(customer);
         cacheConfig.putAllCustomers(customerRepository.findAll());
 
-        log.info("Customer with ID {} updated successfully", saved.getId());
+        log.info(LOG_CUSTOMER_UPDATED, saved.getId());
         return customerMapper.toDisplayCustomerDto(saved);
     }
 
@@ -163,16 +141,38 @@ public class CustomerService {
 
     @Transactional
     public void deleteCustomer(final Long id) {
-        log.info("Deleting customer with ID: {}", id);
+        log.info(LOG_DELETING_CUSTOMER, id);
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Customer with ID {} not found", id);
-                    return new EntityNotFoundException(
-                            String.format("Customer not found with id: %d", id)
-                    );
+                    log.error(LOG_NOT_FOUND, id);
+                    return new EntityNotFoundException(String.format(CUSTOMER_NOT_FOUND, id));
                 });
         customerRepository.delete(customer);
         cacheConfig.removeAllCustomers();
-        log.info("Customer with ID {} successfully deleted", id);
+        log.info(LOG_CUSTOMER_DELETED, id);
+    }
+
+    private List<String> validateCustomerDto(CreateCustomerDto dto) {
+        List<String> errors = new ArrayList<>();
+
+        if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
+            errors.add(USERNAME_BLANK);
+        } else if (dto.getUsername().length() < 3 || dto.getUsername().length() > 20) {
+            errors.add(USERNAME_LENGTH);
+        }
+
+        if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+            errors.add(PASSWORD_BLANK);
+        } else if (dto.getPassword().length() < 6) {
+            errors.add(PASSWORD_LENGTH);
+        }
+
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            errors.add(EMAIL_BLANK);
+        } else if (!dto.getEmail().matches(EMAIL_REGEX)) {
+            errors.add(EMAIL_INVALID);
+        }
+
+        return errors;
     }
 }
