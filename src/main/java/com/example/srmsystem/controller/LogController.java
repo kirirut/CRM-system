@@ -34,7 +34,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 public class LogController {
 
-    private static final Path LOG_FILE_PATH = Paths.get("logs/srmsystem.log");
     private static final String LOG_DIRECTORY = "logs/";
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
     private static final DateTimeFormatter DATE_FORMATTER =
@@ -90,7 +89,7 @@ public class LogController {
         try {
             LocalDate logDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
             return asyncLogService.createLogFileAsync(logDate)
-                    .thenApply(logId -> ResponseEntity.status(HttpStatus.ACCEPTED).body(logId.toString()));
+                    .thenApply(logId -> ResponseEntity.status(HttpStatus.ACCEPTED).body(logId));
         } catch (Exception e) {
             throw new AppException("Error while creating log file for date: " + date, e);
         }

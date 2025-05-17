@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -104,12 +103,10 @@ public class CustomerController {
 
         List<DisplayCustomerDto> createdCustomers = customerDtos.stream()
                 .map(customerService::createCustomer)
-                .collect(Collectors.toList());
-
+                .toList();
         log.info("{} clients successfully created", createdCustomers.size());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomers);
     }
-
 
     @Operation(summary = "Обновить информацию о клиенте")
     @ApiResponses(value = {

@@ -29,8 +29,7 @@ public class CacheConfig {
     public void putAllCustomers(List<Customer> customers) {
         List<DisplayCustomerDto> displayCustomerDtos = customers.stream()
                 .map(this::toDisplayCustomerDto)
-                .collect(Collectors.toList());
-
+                .toList();
         allCustomersCache.put(ALL_CUSTOMERS_CACHE_KEY, displayCustomerDtos);
     }
 
@@ -43,13 +42,12 @@ public class CacheConfig {
     }
 
     public void putAllOrders(List<Order> orders) {
-
         List<DisplayOrderDto> displayOrderDtos = orders.stream()
                 .map(this::toDisplayOrderDto)
-                .collect(Collectors.toList());
-
+                .toList();
         allOrdersCache.put(ALL_ORDERS_CACHE_KEY, displayOrderDtos);
     }
+
 
     public void removeAllOrders() {
         allOrdersCache.remove(ALL_ORDERS_CACHE_KEY);
