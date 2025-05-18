@@ -12,8 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "http://fastcrm.tw1.su",    // Ваш основной домен
-                        "http://77.232.138.67:3000", // Дополнительный адрес (если нужно)
-                        "https://api.github.com"
+                        "http://77.232.138.67:3000" // Дополнительный адрес (если нужно)
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
