@@ -33,7 +33,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build package
-        run: mvn clean package -DskipTests
+        run: mvn clean package
 
       - name: Start services with Docker Compose
         run: docker compose up -d
