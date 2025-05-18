@@ -9,10 +9,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Разрешаем CORS для всех путей
-                .allowedOrigins("http://fastcrm.tw1.su:3000,http://fastcrm.tw1.su:80") // Разрешаем запросы с фронтенда
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Разрешенные HTTP-методы
-                .allowedHeaders("*") // Разрешаем все заголовки
-                .allowCredentials(true); // Разрешаем отправку куки (если нужно)
+        registry.addMapping("/**")
+                .allowedOrigins(
+                        "http://fastcrm.tw1.su",    // Ваш основной домен
+                        "http://77.232.138.67:3000", // Дополнительный адрес (если нужно)
+                        "https://api.github.com"
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
