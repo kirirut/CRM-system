@@ -32,6 +32,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: mavenJdc
+        uses: maven package
+
       - name: Start services with Docker Compose
         run: docker compose up -d
 
