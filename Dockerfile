@@ -8,6 +8,9 @@ COPY src ./src
 
 RUN mvn clean package -DskipTests
 
+COPY wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
 # Stage 2: run
 FROM openjdk:17-jdk-slim
 
