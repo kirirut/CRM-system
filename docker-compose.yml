@@ -39,7 +39,7 @@ services:
       dockerfile: Dockerfile
     container_name: my_frontend_app
     ports:
-      - "80:80"
+      - "3000:3000"
     networks:
       - srm-net
     depends_on:
