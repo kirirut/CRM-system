@@ -45,5 +45,5 @@ jobs:
         run: mvn -B -e -X verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.projectKey=kirirut_CRM-system \
           -Dsonar.organization=kirirut \
-          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.host.url=https://sonarcloud.io 
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
