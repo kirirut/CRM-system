@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 @Configuration
 @Profile("ci")
 public class CIEnvConfig {
