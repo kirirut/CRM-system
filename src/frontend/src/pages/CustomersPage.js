@@ -256,7 +256,9 @@ const CustomersPage = () => {
                                 <Col md={11}>
                                     <Form>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Имя пользователя</Form.Label>
+                                            <Form.Label>
+                                                Имя пользователя <span className="text-danger">*</span>
+                                            </Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="username"
@@ -268,7 +270,9 @@ const CustomersPage = () => {
                                             <Form.Control.Feedback type="invalid">{formErrors[`username-${index}`]}</Form.Control.Feedback>
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Пароль {editingCustomerId && '(оставьте пустым | чтобы не менять)'}</Form.Label>
+                                            <Form.Label>
+                                                Пароль {editingCustomerId && '(оставьте пустым | чтобы не менять)'} <span className="text-danger">*</span>
+                                            </Form.Label>
                                             <Form.Control
                                                 type="password"
                                                 name="password"
@@ -280,7 +284,9 @@ const CustomersPage = () => {
                                             <Form.Control.Feedback type="invalid">{formErrors[`password-${index}`]}</Form.Control.Feedback>
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Email</Form.Label>
+                                            <Form.Label>
+                                                Email <span className="text-danger">*</span>
+                                            </Form.Label>
                                             <Form.Control
                                                 type="email"
                                                 name="email"
@@ -292,7 +298,7 @@ const CustomersPage = () => {
                                             <Form.Control.Feedback type="invalid">{formErrors[`email-${index}`]}</Form.Control.Feedback>
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Телефон *</Form.Label>
+                                            <Form.Label>Телефон</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="phone"
@@ -302,7 +308,7 @@ const CustomersPage = () => {
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Адрес *</Form.Label>
+                                            <Form.Label>Адрес</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="address"
@@ -312,7 +318,7 @@ const CustomersPage = () => {
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Название компании *</Form.Label>
+                                            <Form.Label>Название компании</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="companyName"
