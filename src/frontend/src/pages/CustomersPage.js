@@ -292,33 +292,33 @@ const CustomersPage = () => {
                                             <Form.Control.Feedback type="invalid">{formErrors[`email-${index}`]}</Form.Control.Feedback>
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Телефон</Form.Label>
+                                            <Form.Label>Телефон *</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="phone"
                                                 value={data.phone}
                                                 onChange={handleInputChange(index)}
-                                                placeholder="Введите телефон *"
+                                                placeholder="Введите телефон"
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Адрес</Form.Label>
+                                            <Form.Label>Адрес *</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="address"
                                                 value={data.address}
                                                 onChange={handleInputChange(index)}
-                                                placeholder="Введите адрес *"
+                                                placeholder="Введите адрес"
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Название компании</Form.Label>
+                                            <Form.Label>Название компании *</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 name="companyName"
                                                 value={data.companyName}
                                                 onChange={handleInputChange(index)}
-                                                placeholder="Введите название компании *"
+                                                placeholder="Введите название компании"
                                             />
                                         </Form.Group>
                                     </Form>
