@@ -11,8 +11,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(
-                        "http://fastcrm.tw1.su",    // Ваш основной домен
-                        "http://77.232.138.67:3000" // Дополнительный адрес (если нужно)
+                        "http://fastcrm.tw1.su"   // Ваш основной домен
+
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
