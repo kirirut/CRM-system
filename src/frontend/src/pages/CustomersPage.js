@@ -217,7 +217,14 @@ const CustomersPage = () => {
                             <td>
                                 <div className="d-flex gap-2">
                                     <Button
-                                        variant="warning"
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={() => handleInfoPrompt(customer.id)}
+                                    >
+                                        Информация
+                                    </Button>
+                                    <Button
+                                        variant="secondary"
                                         size="sm"
                                         onClick={() => handleEdit(customer.id)}
                                     >
@@ -229,13 +236,6 @@ const CustomersPage = () => {
                                         onClick={() => handleDeletePrompt(customer.id)}
                                     >
                                         Удалить
-                                    </Button>
-                                    <Button
-                                        variant="info"
-                                        size="sm"
-                                        onClick={() => handleInfoPrompt(customer.id)}
-                                    >
-                                        Информация
                                     </Button>
                                 </div>
                             </td>
@@ -268,7 +268,7 @@ const CustomersPage = () => {
                                             <Form.Control.Feedback type="invalid">{formErrors[`username-${index}`]}</Form.Control.Feedback>
                                         </Form.Group>
                                         <Form.Group className="mb-3">
-                                            <Form.Label>Пароль {editingCustomerId && '(оставьте пустым, чтобы не менять)'}</Form.Label>
+                                            <Form.Label>Пароль {editingCustomerId && '(оставьте пустым | чтобы не менять)'}</Form.Label>
                                             <Form.Control
                                                 type="password"
                                                 name="password"
@@ -298,7 +298,7 @@ const CustomersPage = () => {
                                                 name="phone"
                                                 value={data.phone}
                                                 onChange={handleInputChange(index)}
-                                                placeholder="Введите телефон (опционально)"
+                                                placeholder="Введите телефон *"
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">
@@ -308,7 +308,7 @@ const CustomersPage = () => {
                                                 name="address"
                                                 value={data.address}
                                                 onChange={handleInputChange(index)}
-                                                placeholder="Введите адрес (опционально)"
+                                                placeholder="Введите адрес *"
                                             />
                                         </Form.Group>
                                         <Form.Group className="mb-3">
@@ -318,7 +318,7 @@ const CustomersPage = () => {
                                                 name="companyName"
                                                 value={data.companyName}
                                                 onChange={handleInputChange(index)}
-                                                placeholder="Введите название компании (опционально)"
+                                                placeholder="Введите название компании *"
                                             />
                                         </Form.Group>
                                     </Form>
