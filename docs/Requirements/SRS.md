@@ -112,6 +112,14 @@ CRM-система позволит:
 ![Filters Mockup](docs/Mockups/order.png)
 
 
+#### Создание заказа
+![Filters Mockup](docs/Mockups/createorder.png)
+
+
+
+
+
+
 
 
 <a name="user_interface"/>
