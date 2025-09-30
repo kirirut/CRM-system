@@ -99,19 +99,21 @@ CRM-система позволит:
 ### Мокапы интерфейса
 
 #### API / Endpoints
-![API Mockup](docs/Mockups/api.png)
+
+#### API / Endpoints
+![API Mockup](https://raw.githubusercontent.com/kirirut/CRM-system/main/docs/Mockups/api.png)
 
 #### Список клиентов
-![Clients Mockup](docs/Mockups/clients.png)
+![Clients Mockup](https://raw.githubusercontent.com/kirirut/CRM-system/main/docs/Mockups/clients.png)
 
 #### Фильтры заказов
-![Filters Mockup](docs/Mockups/filters.png)
+![Filters Mockup](https://raw.githubusercontent.com/kirirut/CRM-system/main/docs/Mockups/filters.png)
 
 #### Заказ у клиента
-![Order Mockup](docs/Mockups/order.png)
+![Order Mockup](https://raw.githubusercontent.com/kirirut/CRM-system/main/docs/Mockups/order.png)
 
 #### Создание заказа
-![Create Order Mockup](docs/Mockups/createorder.png)
+![Create Order Mockup](https://raw.githubusercontent.com/kirirut/CRM-system/main/docs/Mockups/createorder.png)
 
 
 
