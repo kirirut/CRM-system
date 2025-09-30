@@ -100,20 +100,24 @@ CRM-система позволит:
 
 #### API / Endpoints
 
-![API Mockup](docs/Mockups/api.png)
+![API Mockup](C:\Users\Vadim1\IdeaProjects\CRM-system\docs\Mockups\api.png)
 
 #### Список клиентов
-![Clients Mockup](docs/Mockups/clients.png)
+
+![Clients Mockup](C:\Users\Vadim1\IdeaProjects\CRM-system\docs\Mockups\clients.png)
 
 #### Фильтры заказов
-![Filters Mockup](docs/Mockups/filters.png)
+
+![Filters Mockup](C:\Users\Vadim1\IdeaProjects\CRM-system\docs\Mockups\filters.png)
 
 #### Заказ у клиента
-![Filters Mockup](docs/Mockups/order.png)
+
+![Filters Mockup](C:\Users\Vadim1\IdeaProjects\CRM-system\docs\Mockups\order.png)
 
 
 #### Создание заказа
-![Filters Mockup](docs/Mockups/createorder.png)
+
+![Filters Mockup](C:\Users\Vadim1\IdeaProjects\CRM-system\docs\Mockups\createorder.png)
 
 
 
