@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const getBaseUrl = () => {
-    return 'http://77.232.138.67:8080'; // Адрес вашего бэкенда
+    return 'http://localhost:8080'; // Адрес вашего бэкенда
 };
 
 const api = axios.create({
